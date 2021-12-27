@@ -1,2 +1,1 @@
-# rosa
-ROSA - Rootifying Output from Struck ADCs
+## ROSA - Rootifying Output from Struck ADCs
