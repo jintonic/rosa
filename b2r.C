@@ -90,7 +90,7 @@ void b2r(const char* fi = "input.bin", const char* fo = "output.root",
 	}
 
 	cout<<"\nConvert binary input to ROOT trees..."<<endl;
-	for (int ispill=0; ispill<3; ispill++) { // loop over spills
+	for (int ispill=0; ispill<nspill; ispill++) { // loop over spills
 		input->seekg(spill[ispill], ios::beg); // jump to the start of a spill
 
 		for (int module=0; module<nm; module++) { // loop over modules (cards)
