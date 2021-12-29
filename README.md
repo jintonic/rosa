@@ -14,6 +14,14 @@
 - [b2r.C](b2r.C): a [ROOT][] [script][] to convert a [Struck][] [ADC][] binary output to [ROOT][] [TTree][] [ntuple][]s
 - [b2r.py](b2r.py): a [Python][] [GUI][] to run [b2r.C](b2r.C)
 
+### Similar projects
+- <https://github.com/gcrich/binaryToROOT-NGM3316>, original project
+- <https://github.com/schedges/binaryToROOT-NGM3316>, a newer fork of the original one, which made the parsing of the 48-bit timestamp more robuster across various compilers.
+
+### DAQ software
+- <https://github.com/sergey-inform/SIS3316>, python based
+- <https://github.com/jrellin/sis3316-jrellin>, python based
+
 [Python]: https://www.python.org
 [ROOT]: https://root.cern.ch
 [script]: https://root.cern.ch/root/htmldoc/guides/users-guide/Cling.html
