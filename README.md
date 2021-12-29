@@ -16,11 +16,14 @@
 
 ### Similar projects
 - <https://github.com/gcrich/binaryToROOT-NGM3316>, original project
-- <https://github.com/schedges/binaryToROOT-NGM3316>, a newer fork of the original one, which made the parsing of the 48-bit timestamp more robuster across various compilers.
+- <https://github.com/schedges/binaryToROOT-NGM3316>, a newer fork of the original one, which made the parsing of the 48-bit timestamp more robust across various compilers.
 
 ### DAQ software
-- <https://github.com/sergey-inform/SIS3316>, python based
-- <https://github.com/jrellin/sis3316-jrellin>, python based
+This project is for the decoding of existing [Struck][] [ADC][]'s output. To run the DAQ and generate binary output, one needs a DAQ program, such as the ones listed below.
+
+- <https://github.com/jrellin/sis3316-jrellin>, python based, seems newer
+- <https://github.com/sergey-inform/SIS3316>, python based, first appears on Google
+- <https://code.ornl.gov/nmdcimaging/ngmdaq.git> and its fork <https://code.ornl.gov/CASA/ngmdaq>, not publicly accessible.
 
 [Python]: https://www.python.org
 [ROOT]: https://root.cern.ch
