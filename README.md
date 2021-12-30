@@ -11,6 +11,7 @@
 - [Python][] [tkinter][] is used to create a simple [GUI][]. It should be included by default in most [Python][] installations.
 
 ### Scripts
+- [idx.C](idx.C): a [ROOT][] [script][] to create an index file for a [Struck][] [ADC][] binary output, where basic information of the [ADC][] is saved
 - [b2r.C](b2r.C): a [ROOT][] [script][] to convert a [Struck][] [ADC][] binary output to [ROOT][] [TTree][] [ntuple][]s
 - [b2r.py](b2r.py): a [Python][] [GUI][] to run [b2r.C](b2r.C)
 
