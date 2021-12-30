@@ -72,6 +72,13 @@ void idx(const char* input_file = "input.bin",
 		nspill++;
 	}
 
+	output<<"# format bits:       ";
+	for (int slot=0; slot<max_slot_id; slot++) {
+		for (int ch=0; ch<nch; ch++) 
+			if (empty[slot][ch]==false) output<<setw(6)<<format[slot*nch+ch]<<", ";
+	}
+	output<<endl;
+
 	output<<"# spill,   position";
 	for (int slot=0; slot<max_slot_id; slot++)
 		for (int ch=0; ch<nch; ch++) 
@@ -88,6 +95,7 @@ void idx(const char* input_file = "input.bin",
 		}
 		output<<endl;
 	}
+
 	cout<<"Close files"<<endl; input.close(); output.close();
 }
 
