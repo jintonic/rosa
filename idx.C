@@ -37,6 +37,7 @@ void idx(const char* input_file = "input.bin",
 	bitset<4> format[99]; // format bits of eachchannel
 	int max_slot_id = 21; // max 21 slots per VME chassis
 	bool empty[21][16] = {0}; // whether a channel is empty
+	int min_size[999][21]; // min size of spill among all channels
 
 	while (input.good() && input.tellg()<fsize-40) { // 40: spill header size
 		input.read(byte,4); // get 1st word of spill header
@@ -56,10 +57,12 @@ void idx(const char* input_file = "input.bin",
 				printf("slot%d header word 0: 0x%08x\n",slot,word[0]);
 			}
 
+			min_size[nspill][slot]=INT_MAX;;
 			for (int ch=0; ch<nch; ch++) { // loop over channels
 				input.read(byte,32); // get channel header (8 words)
 				size[nspill][slot*nch+ch] = word[7];
 				if (word[7]==0) { empty[slot][ch]=1; continue; }
+				if (word[7]<min_size[nspill][slot]) min_size[nspill][slot]=word[7];
 
 				input.read(byte,8); // get event header
 				short channel=(*word&0xfff0)>>4; // get channel number imbedded in header
@@ -74,20 +77,24 @@ void idx(const char* input_file = "input.bin",
 
 	output<<"# format bits:       ";
 	for (int slot=0; slot<max_slot_id; slot++) {
+		output<<"         ";
 		for (int ch=0; ch<nch; ch++) 
 			if (empty[slot][ch]==false) output<<setw(6)<<format[slot*nch+ch]<<", ";
 	}
 	output<<endl;
 
 	output<<"# spill,   position";
-	for (int slot=0; slot<max_slot_id; slot++)
+	for (int slot=0; slot<max_slot_id; slot++) {
+		output<<",  slot "<<slot;
 		for (int ch=0; ch<nch; ch++) 
 			if (empty[slot][ch]==false) output<<",   ch"<<setw(2)<<slot*nch+ch;
+	}
 	output<<endl;
 
 	for (int spill=0; spill<nspill; spill++) {
 		output<<setw(7)<<spill<<", "<<setw(10)<<pos[spill];
 		for (int slot=0; slot<max_slot_id; slot++) {
+			output<<", "<<setw(7)<<min_size[spill][slot];
 			for (int ch=0; ch<nch; ch++) {
 				if (empty[slot][ch]) continue;
 				output<<","<<setw(7)<<size[spill][slot*nch+ch];
