@@ -26,8 +26,7 @@ void idx(const char* input_file = "input.bin",
 	int word[100]; // read not more than 100 words at a time
 	char* byte = (char*) word; // index in unit of byte instead of word
 	input.read(byte,12); // get 1st 3 words of file header
-	output<<"# file header word 0: 0x"<<hex<<word[0]<<endl;
-	output<<"# file header word 2: 0x"<<word[2]<<dec<<endl;
+	output<<"# file header word 0: 0x"<<hex<<word[0]<<dec<<endl;
 	input.seekg(400-12, ios::cur); // skip the rest header	(400 bytes in total)
 
 	cout<<"Index data blocks (spills) "<<endl;
@@ -74,6 +73,14 @@ void idx(const char* input_file = "input.bin",
 		}
 		nspill++;
 	}
+
+	output<<"# slot used:";
+	for (int slot=0; slot<max_slot_id; slot++) output<<" "<<slot;
+	output<<endl;
+	
+	output<<"# numbers under title \"ch N\" are spill sizes for channel N"<<endl;
+	output<<"# numbers under title \"slot N\" "
+		"are the smallest spill size among all channels in that slot"<<endl;
 
 	output<<"# format bits:       ";
 	for (int slot=0; slot<max_slot_id; slot++) {
