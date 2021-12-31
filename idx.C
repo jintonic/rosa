@@ -42,7 +42,7 @@ void idx(const char* input_file = "input.bin",
 		input.read(byte,4); // get 1st word of spill header
 		if (nspill==0) cout<<"Spill header word 0: 0x"<<hex<<word[0]<<dec<<endl;
 		input.seekg(40-4, ios::cur); // skip the rest header (40 bytes in total)
-		cout<<"Index spill "<<nspill<<endl;
+		if (nspill%10==0) cout<<"Index spill "<<nspill<<endl;
 		pos[nspill]=input.tellg(); // record spill position
 
 		for (int slot=0; slot<max_slot_id; slot++) { // loop over slots
@@ -73,6 +73,7 @@ void idx(const char* input_file = "input.bin",
 		}
 		nspill++;
 	}
+	cout<<nspill<<" spills indexed in total"<<endl;
 
 	output<<"# slot used:";
 	for (int slot=0; slot<max_slot_id; slot++) output<<" "<<slot;
@@ -110,6 +111,6 @@ void idx(const char* input_file = "input.bin",
 		output<<endl;
 	}
 
-	cout<<"Close files"<<endl; input.close(); output.close();
+ 	input.close(); output.close();
 }
 
