@@ -54,70 +54,104 @@ Label(root, text="Select ROOT file:").grid(column=2, row=0, sticky='nw')
 rlist=Listbox(root, height=8)
 rlist.grid(column=2, row=1, sticky='ew')
 
-from subprocess import Popen
+text=Text(root, width=120, height=25, wrap=NONE)
+text.grid(column=0, row=3, columnspan=3)
+
+def show_usage(event=None):
+    text.delete(1.0,'end'); text.insert(INSERT, usage)
+root.bind('h', show_usage);
+
+show_usage()
+
+def list_index_files_in(experiment_folder):
+    ilist.delete(0,'end');
+    for folders, subdirs, files in walk(experiment_folder):
+        for f in files:
+            if f[-4:]==".csv": ilist.insert("end",f)
+        if ilist.size()%2: ilist.itemconfig("end", bg='azure', fg='black')
+    b2r_button['state']='normal' if ilist.size()>0 else 'disabled'
+
+from tkinter import filedialog
+from subprocess import Popen,PIPE
 def run_idx_C(event=None):
-    print(elist.curselection()[0])
+    binfile = filedialog.askopenfilename(initialdir = "/",
+            title = "Select a binary file to index",
+            filetypes = (("binary files", "*.bin*"), ("all files", "*.*")))
+    if binfile=='': return
     folder=elist.get(elist.curselection()[0]).replace('\\','/')
+    text.delete(1.0,'end')
+    with Popen(['root', '-l', '-b', '-q', 'idx.C("'+binfile+'","'+folder+'")'],
+            stdout=PIPE, stderr=PIPE) as p:
+        if p.stdout:
+            for line in p.stdout: text.insert(END, line)
+    list_index_files_in(folder)
+
 idx_button=Button(root,text='Run idx.C',state='disabled',command=run_idx_C)
 idx_button.grid(column=0, row=2, sticky='se')
 idx_button.bind('<Return>', run_idx_C)
 root.bind('i', run_idx_C)
 
+def list_root_files_in(experiment_folder):
+    rlist.delete(0,'end')
+    for folders, subdirs, files in walk(experiment_folder):
+        for f in files:
+            if f[-4:]=="root": rlist.insert("end",f)
+        if rlist.size()%2: rlist.itemconfig("end", bg='azure', fg='black')
+    view_button['state']='normal' if rlist.size()>0 else 'disabled'
+
 def run_b2r_C(event=None):
-    print(ilist.curselection()[0])
     folder=elist.get(elist.curselection()[0]).replace('\\','/')
     file=ilist.get(ilist.curselection()[0]).replace('\\','/')
     file=folder+'/'+file
-    Popen(['root', '-l', 'b2r.C("'+file+'")'])
-b2r_button=Button(root,text='run b2r.C',state='disabled',command=run_b2r_C)
+    Popen(['root', '-l', '-b', '-q', 'b2r.C("'+file+'")'])
+    list_root_files_in(folder)
+
+b2r_button=Button(root,text='Run b2r.C',state='disabled',command=run_b2r_C)
 b2r_button.grid(column=1, row=2, sticky="se")
 b2r_button.bind('<Return>', run_b2r_C)
 root.bind('v', run_b2r_C)
 
 def run_view_C(event=None):
-    print(elist.curselection()[0])
     folder=elist.get(elist.curselection()[0]).replace('\\','/')
     file=rlist.get(rlist.curselection()[0]).replace('\\','/')
     file=folder+'/'+file
     Popen(['root', '-l', 'view.C("'+file+'")'])
-view_button=Button(root,text='run view.C',state='disabled',command=run_view_C)
+
+view_button=Button(root,text='Run view.C',state='disabled',command=run_view_C)
 view_button.grid(column=2, row=2, sticky="se")
 view_button.bind('<Return>', run_view_C)
 root.bind('v', run_view_C)
 
-text=Text(root, width=120, height=25)
-text.grid(column=0, row=3, columnspan=3)
-def show_usage(event=None):
-    text.delete(1.0,'end')
-    text.insert(INSERT, usage)
-root.bind('h', show_usage);
-
-show_usage()
-
-def list_files_in(experiment_folder=''):
-    ilist.delete(0,'end'); rlist.delete(0,'end')
-    for folders, subdirs, files in walk(experiment_folder):
-        for file in files:
-            if file[-4:]==".csv": ilist.insert("end",file)
-            if file[-4:]=="root": rlist.insert("end",file)
-        if ilist.size()%2: ilist.itemconfig("end", bg='azure', fg='black')
-    b2r_button['state']='normal' if ilist.size()>0 else 'disabled'
+def experiment_list_selected(event=None):
     idx_button['state']='normal' if elist.size()>0 else 'disabled'
-    view_button['state']='normal' if rlist.size()>0 else 'disabled'
+    folder=elist.get(elist.curselection()[0]).replace('\\','/')
+    list_index_files_in(folder); list_root_files_in(folder)
+    text.delete(1.0,'end')
+    with open(folder+'/daq.cfg', 'r') as f: text.insert(INSERT, f.read())
+elist.bind("<<ListboxSelect>>", experiment_list_selected)
 
-def experiment_selected(event=None):
-    exp_folder=elist.get(elist.curselection()[0]).replace('\\','/')
-    list_files_in(exp_folder)
-    text.delete(1.0,'end'); text.config(wrap=NONE)
-    with open(exp_folder+'/daq.cfg', 'r') as f: text.insert(INSERT, f.read())
-elist.bind("<<ListboxSelect>>", experiment_selected)
-
-def index_folder_selected(event=None):
-    text.delete(1.0,'end'); text.config(wrap=NONE)
+def index_list_selected(event=None):
+    if ilist.size()==0: return
     folder=elist.get(elist.curselection()[0])
-    file=ilist.get(ilist.curselection()[0])
-    with open(folder+'/'+file, 'r') as f: text.insert(INSERT, f.read())
-ilist.bind("<<ListboxSelect>>", index_folder_selected)
+    idxfile=ilist.get(ilist.curselection()[0])
+    b2r_button['state']='normal' if ilist.size()>0 else 'disabled'
+    text.delete(1.0,'end')
+    with open(folder+'/'+idxfile, 'r') as f: text.insert(INSERT, f.read())
+ilist.bind("<<ListboxSelect>>", index_list_selected)
+
+from datetime import datetime
+def root_list_selected(event=None):
+    if rlist.size()==0: return
+    folder=elist.get(elist.curselection()[0])
+    rootfile=rlist.get(rlist.curselection()[0])
+    view_button['state']='normal' if rlist.size()>0 else 'disabled'
+    filesize=path.getsize(folder+'/'+rootfile)/1024/1024
+    info='File size: '+str(filesize)+' M\n'
+    timestamp=path.getmtime(folder+'/'+rootfile)
+    time_object=datetime.fromtimestamp(timestamp)
+    info=info+'Modification time: '+time_object.strftime("%Y/%m/%d, %H:%M:%S")
+    text.delete(1.0,'end'); text.insert(INSERT, info)
+rlist.bind("<<ListboxSelect>>", root_list_selected)
 
 # give focus to the GUI window in Mac
 # https://stackoverflow.com/questions/17774859
@@ -128,3 +162,4 @@ if platform() == 'Darwin':  # How Mac OS X is identified by Python
 # If you put root.destroy() here, it will cause an error if the window is
 # closed with the window manager.
 root.mainloop()
+
