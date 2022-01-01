@@ -99,7 +99,7 @@ void idx(const char* input_file = "input.bin",
 			output<<setw(5)<<format[slot][ch];
 	output<<endl;
 
-	output<<"# spill positions and sizes:"<<endl;
+	output<<"#\n# spill positions and sizes:"<<endl;
 	output<<"# numbers under title \"ch N\" are spill sizes for channel N"<<endl;
 	output<<"# numbers under title \"slot N\" "
 		"are the smallest spill size among all channels in that slot"<<endl;
