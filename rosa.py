@@ -58,9 +58,9 @@ from subprocess import Popen
 def run_idx_C(event=None):
     print(elist.curselection()[0])
     folder=elist.get(elist.curselection()[0]).replace('\\','/')
-index=Button(root, text='Run idx.C', state='disabled', command=run_idx_C)
-index.grid(column=0, row=2, sticky='se')
-index.bind('<Return>', run_idx_C)
+idx_button=Button(root,text='Run idx.C',state='disabled',command=run_idx_C)
+idx_button.grid(column=0, row=2, sticky='se')
+idx_button.bind('<Return>', run_idx_C)
 root.bind('i', run_idx_C)
 
 def run_b2r_C(event=None):
@@ -69,9 +69,9 @@ def run_b2r_C(event=None):
     file=ilist.get(ilist.curselection()[0]).replace('\\','/')
     file=folder+'/'+file
     Popen(['root', '-l', 'b2r.C("'+file+'")'])
-conv=Button(root, text='run b2r.C', state='disabled', command=run_b2r_C)
-conv.grid(column=2, row=2, sticky="se")
-conv.bind('<Return>', run_b2r_C)
+b2r_button=Button(root,text='run b2r.C',state='disabled',command=run_b2r_C)
+b2r_button.grid(column=1, row=2, sticky="se")
+b2r_button.bind('<Return>', run_b2r_C)
 root.bind('v', run_b2r_C)
 
 def run_view_C(event=None):
@@ -80,9 +80,9 @@ def run_view_C(event=None):
     file=rlist.get(rlist.curselection()[0]).replace('\\','/')
     file=folder+'/'+file
     Popen(['root', '-l', 'view.C("'+file+'")'])
-view=Button(root, text='run view.C', state='disabled', command=run_view_C)
-view.grid(column=2, row=2, sticky="se")
-view.bind('<Return>', run_view_C)
+view_button=Button(root,text='run view.C',state='disabled',command=run_view_C)
+view_button.grid(column=2, row=2, sticky="se")
+view_button.bind('<Return>', run_view_C)
 root.bind('v', run_view_C)
 
 text=Text(root, width=120, height=25)
@@ -94,22 +94,22 @@ root.bind('h', show_usage);
 
 show_usage()
 
-def list_files_in(folder=''):
+def list_files_in(experiment_folder=''):
     ilist.delete(0,'end'); rlist.delete(0,'end')
-    for folders, subdirs, files in walk(folder):
+    for folders, subdirs, files in walk(experiment_folder):
         for file in files:
             if file[-4:]==".csv": ilist.insert("end",file)
             if file[-4:]=="root": rlist.insert("end",file)
         if ilist.size()%2: ilist.itemconfig("end", bg='azure', fg='black')
-    conv['state']='normal' if ilist.size()>0 else 'disabled'
-    index['state']='normal' if rlist.size()>0 else 'disabled'
-    view['state']='normal' if rlist.size()>0 else 'disabled'
+    b2r_button['state']='normal' if ilist.size()>0 else 'disabled'
+    idx_button['state']='normal' if elist.size()>0 else 'disabled'
+    view_button['state']='normal' if rlist.size()>0 else 'disabled'
 
 def experiment_selected(event=None):
-    folder=elist.get(elist.curselection()[0]).replace('\\','/')
-    list_files_in(folder)
-    text.delete(1.0,'end'); text.config(wrap=WORD)
-    with open(folder+'/daq.cfg', 'r') as f: text.insert(INSERT, f.read())
+    exp_folder=elist.get(elist.curselection()[0]).replace('\\','/')
+    list_files_in(exp_folder)
+    text.delete(1.0,'end'); text.config(wrap=NONE)
+    with open(exp_folder+'/daq.cfg', 'r') as f: text.insert(INSERT, f.read())
 elist.bind("<<ListboxSelect>>", experiment_selected)
 
 def index_folder_selected(event=None):
