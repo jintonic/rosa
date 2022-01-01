@@ -21,7 +21,7 @@
 1. [Download][] and unzip this project to your local machine (or use [git][] [clone][] if you know how).
 2. Get into the project folder and create a subdirectory there for your experiment.
 3. Create a `daq.cfg` file inside your newly created folder, and specify your [Struck][] [ADC][] setup therein. The syntax of such a configuration file is demonstrated in [COHERENT/MARS/daq.cfg](COHERENT/MARS/daq.cfg).
-4. Run [rosa.py][] (Double click the file if you are in a file browser, or `python3 rosa.py` if you are in a terminal) to launch a simple [GUI][]. Your folder should appear in the top left list box called "Select DAQ configuration:".
+4. Run [rosa.py][] (Double click the file if you are in a file browser, or `python3 rosa.py` if you are in a terminal) to launch a simple [GUI][]. Your folder should appear in the top left list box called "Select experiment:".
 5. Select your folder in the list, the content of `daq.cfg` in your folder should be shown in the [GUI][]. Double check if everything is OK.
 6. Click the button "Run idx.C", a window will pop up for you to select a [Struck][] [ADC][] binary output file to parse. After the parsing process, a [CSV][] file will be created in your folder. It contains all the information that is needed to run [b2r.C](b2r.C), for example, an index of positions and sizes of data blocks in the selected binary output file. NOTE: If the output file is compressed, it will be unzipped first. The unzipped file will be placed in your folder and then be indexed.
 7. Select the [CSV][] file in the list box called "Select index file:". Its content will be displayed in the [GUI][]. Double check if the binary output is correctly indexed.
