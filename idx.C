@@ -31,12 +31,12 @@ void idx(const char* input_file = "input.bin",
 
 	cout<<"Index data blocks (spills) "<<endl;
 	int nspill=0; // total number of spills in file
-	int pos[999] = {0}; // positions of spills in file
-	int size[999][99] = {0}; // spill size of each channel (max 99 channels)
-	bitset<4> format[99]; // format bits of eachchannel
-	int max_slot_id = 21; // max 21 slots per VME chassis
+	int pos[999] = {0}; // positions of spills in file (max 999 spills in a file)
+	int nslot = 21; // number of slots used (max 21 slots per VME chassis)
+	int size[999][21][16] = {0}; // size of spill in each channel
+	int min_size[999][21]; // min size of spill among all channels in a slot
+	bitset<4> format[21][16]; // format bits of each channel
 	bool empty[21][16] = {0}; // whether a channel is empty
-	int min_size[999][21]; // min size of spill among all channels
 
 	while (input.good() && input.tellg()<fsize-40) { // 40: spill header size
 		input.read(byte,4); // get 1st word of spill header
@@ -45,12 +45,12 @@ void idx(const char* input_file = "input.bin",
 		if (nspill%10==0) cout<<"Index spill "<<nspill<<endl;
 		pos[nspill]=input.tellg(); // record spill position
 
-		for (int slot=0; slot<max_slot_id; slot++) { // loop over slots
+		for (int slot=0; slot<nslot; slot++) { // loop over slots
 			input.read(byte,8); // get slot header (2 words)
-			if (nspill==0) { // update max_slot_id when we are in the 1st spill
+			if (nspill==0) { // update nslot when we are in the 1st spill
 				if (word[0]==0xabbaabba) { // have reached next spill header
 					input.seekg(-8,ios::cur); // go back to the beginning of the spill
-					max_slot_id=slot; // update max_slot_id
+					nslot=slot; // update nslot
 					break; // quit from the slot loop
 				}
 				printf("slot%d header word 0: 0x%08x\n",slot,word[0]);
@@ -59,7 +59,7 @@ void idx(const char* input_file = "input.bin",
 			min_size[nspill][slot]=INT_MAX;;
 			for (int ch=0; ch<nch; ch++) { // loop over channels
 				input.read(byte,32); // get channel header (8 words)
-				size[nspill][slot*nch+ch] = word[7];
+				size[nspill][slot][ch] = word[7];
 				if (word[7]==0) { empty[slot][ch]=1; continue; }
 				if (word[7]<min_size[nspill][slot]) min_size[nspill][slot]=word[7];
 
@@ -67,7 +67,7 @@ void idx(const char* input_file = "input.bin",
 				short channel=(*word&0xfff0)>>4; // get channel number imbedded in header
 				if (nspill==0 && channel!=slot*nch+ch) cout<<"Warning: "<<slot<<
 					"(slot) x "<<nch<<"(# of ch/slot) + " <<ch<<"(ch) != "<<channel<<endl;
-				format[channel]=byte[0]; // get format bits imbedded in header
+				format[slot][ch]=byte[0]; // get format bits imbedded in header
 				input.seekg((word[7]-2)*4, ios::cur); // skip the rest
 			}
 		}
@@ -75,24 +75,37 @@ void idx(const char* input_file = "input.bin",
 	}
 	cout<<nspill<<" spills indexed in total"<<endl;
 
-	output<<"# slot used:";
-	for (int slot=0; slot<max_slot_id; slot++) output<<" "<<slot;
-	output<<endl;
+	// save indices to output
+	output<<"# number of slots used: "<<nslot<<endl;;
 	
+	output<<"# local channel id:\n#";
+	for (int slot=0; slot<nslot; slot++)
+		for (int ch=0; ch<nch; ch++) 
+			output<<setw(5)<<ch;
+	output<<endl;
+	output<<"# global channel id (slot x "<<nch<<" + local channel id):\n#";
+	for (int slot=0; slot<nslot; slot++)
+		for (int ch=0; ch<nch; ch++) 
+			output<<setw(5)<<slot*nch+ch;
+	output<<endl;
+	output<<"# is channel empty? (1: yes, 0: no):\n#";
+	for (int slot=0; slot<nslot; slot++)
+		for (int ch=0; ch<nch; ch++) 
+			output<<setw(5)<<empty[slot][ch];
+	output<<endl;
+	output<<"# format bits in each channel:\n#";;
+	for (int slot=0; slot<nslot; slot++)
+		for (int ch=0; ch<nch; ch++) 
+			output<<setw(5)<<format[slot][ch];
+	output<<endl;
+
+	output<<"# spill positions and sizes:"<<endl;
 	output<<"# numbers under title \"ch N\" are spill sizes for channel N"<<endl;
 	output<<"# numbers under title \"slot N\" "
 		"are the smallest spill size among all channels in that slot"<<endl;
 
-	output<<"# format bits:       ";
-	for (int slot=0; slot<max_slot_id; slot++) {
-		output<<"         ";
-		for (int ch=0; ch<nch; ch++) 
-			if (empty[slot][ch]==false) output<<setw(6)<<format[slot*nch+ch]<<", ";
-	}
-	output<<endl;
-
 	output<<"# spill,   position";
-	for (int slot=0; slot<max_slot_id; slot++) {
+	for (int slot=0; slot<nslot; slot++) {
 		output<<",  slot "<<slot;
 		for (int ch=0; ch<nch; ch++) 
 			if (empty[slot][ch]==false) output<<",   ch"<<setw(2)<<slot*nch+ch;
@@ -101,11 +114,11 @@ void idx(const char* input_file = "input.bin",
 
 	for (int spill=0; spill<nspill; spill++) {
 		output<<setw(7)<<spill<<", "<<setw(10)<<pos[spill];
-		for (int slot=0; slot<max_slot_id; slot++) {
+		for (int slot=0; slot<nslot; slot++) {
 			output<<", "<<setw(7)<<min_size[spill][slot];
 			for (int ch=0; ch<nch; ch++) {
 				if (empty[slot][ch]) continue;
-				output<<","<<setw(7)<<size[spill][slot*nch+ch];
+				output<<","<<setw(7)<<size[spill][slot][ch];
 			}
 		}
 		output<<endl;
