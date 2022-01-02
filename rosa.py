@@ -39,7 +39,7 @@ folders=[] # obtain a list of folders containing daq.cfg
 from os import walk, system, path, listdir
 for folder, subdirs, files in walk('.'):
     if '.git' in subdirs: subdirs.remove('.git')
-    if 'daq.cfg' in files: folders.append(folder)
+    if 'daq.cfg' in files: folders.append(folder[2:])
 folders.sort()
 for folder in folders:
     elist.insert("end",folder)
@@ -66,10 +66,10 @@ show_usage()
 def list_index_files_in(experiment_folder):
     ilist.delete(0,'end');
     for folders, subdirs, files in walk(experiment_folder):
+        files.sort()
         for f in files:
             if f[-4:]==".csv": ilist.insert("end",f)
         if ilist.size()%2: ilist.itemconfig("end", bg='azure', fg='black')
-    b2r_button['state']='normal' if ilist.size()>0 else 'disabled'
 
 from tkinter import filedialog
 from subprocess import Popen,PIPE
@@ -94,10 +94,10 @@ root.bind('i', run_idx_C)
 def list_root_files_in(experiment_folder):
     rlist.delete(0,'end')
     for folders, subdirs, files in walk(experiment_folder):
+        files.sort()
         for f in files:
             if f[-4:]=="root": rlist.insert("end",f)
         if rlist.size()%2: rlist.itemconfig("end", bg='azure', fg='black')
-    view_button['state']='normal' if rlist.size()>0 else 'disabled'
 
 def run_b2r_C(event=None):
     folder=elist.get(elist.curselection()[0]).replace('\\','/')
