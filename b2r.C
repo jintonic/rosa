@@ -72,8 +72,7 @@ void b2r(const char* index_file = "index.csv")
 	nspill++; cout<<nspill<<" spills to be read"<<endl<<endl;
 
 	// generate root file name
-	TString root_file(gSystem->BaseName(index_file));
-	root_file.ReplaceAll("csv","root");
+	TString root_file(index_file); root_file.ReplaceAll("csv","root");
 
 	cout<<"\nCreate "<<root_file<<endl;
 	TFile *output = new TFile(root_file, "recreate");
