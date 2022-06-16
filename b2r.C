@@ -29,7 +29,7 @@ void b2r(const char* index_file = "index.csv")
 	cout<<nc<<endl;
 
 	cout<<"Get channel status (0: empty, 1: used):"<<endl;
-	for (int i=0; i<5; i++) getline(index,line); // skip 5 lines
+	for (int i=0; i<3+nm; i++) getline(index,line); // skip lines about ch Id
 	bool used[21][16] = {0}; // whether a channel is used
 	for (int m=0; m<nm; m++) {
 		index>>hash;
