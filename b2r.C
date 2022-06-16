@@ -91,7 +91,7 @@ void b2r(const char* index_file = "index.csv")
 			tree[m][c]->Branch("n", &n, "n/I"); // number of waveform samples
 			tree[m][c]->Branch("s", s, "s[n]/F"); // waveform samples
 			tree[m][c]->Branch("t", t, "t[n]/F"); // time [ns] of waveform samples
-			tree[m][c]->Branch("ts", &ts, "ts/l"); // 48-bit event timestamp
+			tree[m][c]->Branch("ts", &ts, "ts/L"); // 48-bit event timestamp
 			if (format[m][c][0]==1) {
 				tree[m][c]->Branch("ns", &ns, "ns/I"); // number of accumulator sums
 				tree[m][c]->Branch("sum", sum, "sum[ns]/I"); // accumulator sums
