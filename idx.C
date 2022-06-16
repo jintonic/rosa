@@ -31,7 +31,7 @@ void idx(const char* input_file = "input.bin",
 	cfg>>key>>key>>key>>key>>nm; // get number of modules used
 	cout<<"- number of channles per module: "<<nc<<endl;
 	cout<<"- number of modules used: "<<nm<<endl<<endl;
-	for (int i=0; i<11; i++) getline(cfg, line); // skip 11 lines
+	for (int i=0; i<5+nm*3; i++) getline(cfg, line); // skip ch id & status
 	bool sync[21][16] = {0}; // sync requirement for each channel
 	for (int m=0; m<nm; m++) 
 		for (int c=0; c<nc; c++) cfg>>sync[m][c];
@@ -58,7 +58,7 @@ void idx(const char* input_file = "input.bin",
 	int size[5000][21][16] = {0}; // size of spill in each channel
 	int min_size[5000][21]; // min size of spill among all channels in a module
 	bitset<4> format[21][16]; // format bits of each channel
-	bool empty[21][16] = {0}; // whether a channel is empty
+	bool used[21][16] = {0}; // channels are not connected by default
 	short ch_id[21][16] = {0}; // global channel id
 
 	while (input.good() && input.tellg()<fsize-40) { // 40: spill header size
@@ -83,10 +83,10 @@ void idx(const char* input_file = "input.bin",
 			for (int c=0; c<nc; c++) { // loop over channels
 				input.read(byte,32); // get channel header (8 words)
 				size[nspill][m][c] = word[7];
-				if (word[7]==0) { empty[m][c]=1; continue; }
+				if (word[7]==0) continue; else used[m][c]=1; 
 				if (word[7]<min_size[nspill][m]) min_size[nspill][m]=word[7];
 
-				if (nspill==0) {
+				if (format[m][c]==0) { // not set yet
 					input.read(byte,8); // get event header
 				  ch_id[m][c]=(*word&0xfff0)>>4; // get channel id
 					format[m][c]=byte[0]; // get format bits
@@ -94,6 +94,7 @@ void idx(const char* input_file = "input.bin",
 				}
 				input.seekg(word[7]*4, ios::cur); // skip the rest
 			}
+			if (min_size[nspill][m]==INT_MAX) min_size[nspill][m]=0; // no ch has data
 		}
 		nspill++;
 	}
@@ -111,7 +112,7 @@ void idx(const char* input_file = "input.bin",
 	}
 	output<<" channel status embedded in data (1: connected, 0: empty):\n#";
 	for (int m=0; m<nm; m++) {
-		for (int c=0; c<nc; c++) output<<setw(5)<<!empty[m][c];
+		for (int c=0; c<nc; c++) output<<setw(5)<<used[m][c];
 		output<<endl<<"#";
 	}
 	output<<" channel sync requirement (1: sync, 0: no need to sync):\n#";
@@ -134,17 +135,17 @@ void idx(const char* input_file = "input.bin",
 	for (int m=0; m<nm; m++) {
 		output<<",  card "<<m;
 		for (int c=0; c<nc; c++) 
-			if (empty[m][c]==false) output<<",   ch"<<setw(2)<<m*nc+c;
+			if (used[m][c]) output<<",   ch"<<setw(2)<<m*nc+c;
 	}
 	output<<endl;
 
 	for (int spill=0; spill<nspill; spill++) {
 		output<<setw(7)<<spill<<", "<<setw(10)<<pos[spill];
 		for (int m=0; m<nm; m++) {
-			output<<", "<<setw(7)<<min_size[spill][m];
+			output<<", "<<setw(8)<<min_size[spill][m];
 			for (int c=0; c<nc; c++) {
-				if (empty[m][c]) continue;
-				output<<","<<setw(7)<<size[spill][m][c];
+				if (!used[m][c]) continue;
+				output<<","<<setw(8)<<size[spill][m][c];
 			}
 		}
 		output<<endl;
