@@ -15,8 +15,12 @@ void idx(const char* input_file = "input.bin",
 
 	cout<<"Load "<<index_folder<<"/daq.cfg..."<<endl;
 	ifstream cfg(Form("%s/daq.cfg",index_folder));
-	string key, value, line, path(index_folder); cfg>>key>>value;
-	if (value==path.substr(path.find("rosa/")+5)) {
+	if (cfg.fail()) { cout<<strerror(errno)<<"! Quit"<<endl; return; }
+	string key, value, line; cfg>>key>>value; // get first line in cfg file
+  string path(index_folder);
+ 	if (path.find("rosa/")>0) path=path.substr(path.find("rosa/")+5);
+	if (path.back()=='/') path.erase(path.end()-1); // remove last '/'
+	if (value==path) {
 		cout<<"DAQ setup for "<<value<<":"<<endl;
  	} else {
 		cout<<"Wrong experiment "<<value<<"! Quit"<<endl;
