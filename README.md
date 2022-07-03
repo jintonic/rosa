@@ -17,6 +17,7 @@
 - [b2r.C](b2r.C): a [ROOT][] [script][] to convert a [Struck][] [ADC][] binary output to [ROOT][] [TTree][] [ntuple][]s
 - [view.C](view.C): a [ROOT][] [script][] to run a [ROOT][] [TTreeViewer][] to examine the contents of [ROOT][] trees
 - [rosa.py](rosa.py): a [Python][] [GUI][] to run all the scripts above
+- [idx.sh](idx.sh): a shell script that submit indexing jobs to [OpenPBS][]
 
 ### Getting started
 1. [Download][] and unzip this project to your local machine (or use [git][] [clone][] if you know how).
@@ -52,6 +53,7 @@ This project is for the decoding of existing [Struck][] [ADC][]'s output. To run
 [digitizers]: https://www.caen.it/sections/digitizer-families
 [tkinter]: https://docs.python.org/3/library/tkinter.html
 [GUI]: https://en.wikipedia.org/wiki/Graphical_user_interface
+[OpenPBS]: https://www.openpbs.org
 [Download]: https://github.com/jintonic/rosa/archive/refs/heads/main.zip
 [CSV]: https://en.wikipedia.org/wiki/Comma-separated_values
 [git]: https://git-scm.com
