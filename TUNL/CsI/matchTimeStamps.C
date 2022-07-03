@@ -40,7 +40,6 @@ void matchTimeStamps(const char* run="SIS3316Raw_20220616234302_1.root")
 		// check BPM timestamps
 		for	(int i=0; i<20; i++) {
 		 	ti[13]->GetEntry(row[13]+i);
-			cout<<evt<<" "<<row[13]<<" "<<i<<" "<<ts[12]<<" "<<ts[13]<<endl;
 			if (ts[13]==ts[12]) {
 				row[13]+=i;
 				output<<evt<<" \t "<<cm<<" \t "<<row[cm]-1<<" \t "<<row[13]<<endl;
