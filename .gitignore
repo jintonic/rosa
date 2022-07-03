@@ -5,3 +5,6 @@
 *.so
 *.csv
 *.txt
+*.log
+*.err
+SIS*Raw*_*.sh
