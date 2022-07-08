@@ -1,6 +1,6 @@
 // Parse and index a binary output from a Struck ADC
 void idx(const char* input_file = "input.bin",
-	 	const char* index_folder = "COHERENT/MARS")
+		const char* index_folder = "COHERENT/MARS")
 {
 	cout<<"Open "<<input_file<<endl;
 	ifstream input(input_file, ios::binary);
@@ -17,14 +17,13 @@ void idx(const char* input_file = "input.bin",
 	ifstream cfg(Form("%s/daq.cfg",index_folder));
 	if (cfg.fail()) { cout<<strerror(errno)<<"! Quit"<<endl; return; }
 	string key, value, line; cfg>>key>>value; // get first line in cfg file
-  string path(index_folder);
- 	if (path.find("rosa/")>0) path=path.substr(path.find("rosa/")+5);
+	string path(index_folder);
+	if (path.find("rosa/")<string::npos) path=path.substr(path.find("rosa/")+5);
 	if (path.back()=='/') path.erase(path.end()-1); // remove last '/'
 	if (value==path) {
 		cout<<"DAQ setup for "<<value<<":"<<endl;
- 	} else {
-		cout<<"Wrong experiment "<<value<<"! Quit"<<endl;
-	 	return;
+	} else {
+		cout<<"Wrong experiment "<<value<<"! Quit"<<endl; return;
 	}
 	float sampling_rate; string unit;
 	cfg>>key>>value>>key>>value>>key>>key>>sampling_rate>>unit;
@@ -92,7 +91,7 @@ void idx(const char* input_file = "input.bin",
 
 				if (format[m][c]==0) { // not set yet
 					input.read(byte,8); // get event header
-				  ch_id[m][c]=(*word&0xfff0)>>4; // get channel id
+					ch_id[m][c]=(*word&0xfff0)>>4; // get channel id
 					format[m][c]=byte[0]; // get format bits
 					input.seekg(-8,ios::cur); // go back to the beginning of the event
 				}
@@ -108,7 +107,7 @@ void idx(const char* input_file = "input.bin",
 	output<<"# sampling rate: "<<sampling_rate<<" "<<unit<<endl;
 	output<<"# number of modules used: "<<nmused<<endl;
 	output<<"# number of channels per module: "<<nc<<endl;
-	
+
 	output<<"# global channel id embedded in event headers:\n#";
 	for (int m=0; m<nm; m++) {
 		for (int c=0; c<nc; c++) output<<setw(5)<<ch_id[m][c];
@@ -155,6 +154,6 @@ void idx(const char* input_file = "input.bin",
 		output<<endl;
 	}
 
- 	input.close(); output.close();
+	input.close(); output.close();
 }
 
