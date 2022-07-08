@@ -2,7 +2,7 @@
 void integrate(const char* run="SIS3316Raw_20220616234302_1.root")
 {
 	int i, n, m, np, bd, row, entry; bool is;
- 	float a, ah, b, db, f, h, tt, p, dp;
+	float a, ah, b, db, f, h, tt, p, dp, dt;
 	float s[1024], t[1024], v[4096], ns[4096], sb[4096], tb[4096];
 	float pa[100], pt[100], ph[100], bgn[100], end[100];
 
@@ -33,6 +33,7 @@ void integrate(const char* run="SIS3316Raw_20220616234302_1.root")
 	to->Branch("m",&m,"m/I"); // number of samples in CsI waveform
 	to->Branch("sb",sb,"sb[m]/F"); // BPM sample value in unit of ADC
 	to->Branch("tb",tb,"tb[m]/F"); // BPM waveform sample time
+	to->Branch("dt",&dt,"dt/F"); // time of flight of neutron to a BD
 	to->Branch("v",v,"v[m]/F"); // CsI sample value in unit of ADC
 	to->Branch("ns",ns,"ns[m]/F"); // CsI waveform index in unit of ns
 	to->Branch("p",&p,"p/F"); // pedestal of CsI averaged over 100 samples
@@ -49,7 +50,7 @@ void integrate(const char* run="SIS3316Raw_20220616234302_1.root")
 	to->Branch("s",s,"s[n]/F"); // BD sample in unit of ADC
 	to->Branch("t",t,"t[n]/F"); // time of a BD waveform sample
 	to->Branch("b",&b,"b/F"); // baseline of BD averaged over 100 samples
-	to->Branch("f",&f,"f/F"); // ah/a
+	to->Branch("f",&f,"f/F"); // (a-ah)/a
 	to->Branch("h",&h,"h/F"); // height of a BD waveform
 	to->Branch("ah",&ah,"ah/F"); // area of head of a BD waveform
 	to->Branch("bd",&bd,"bd/I"); // channel id of a BD
@@ -120,18 +121,20 @@ void integrate(const char* run="SIS3316Raw_20220616234302_1.root")
 		db=sqrt(db)/100; // RMS of baseline
 		if (db>0.32 || is==true) continue;
 
-		if (tt<0) tt=10;
-		for (int k=tt-10; k<n; k++) {
+		if (tt<0) tt=5;
+		for (int k=tt-5; k<275; k++) { // stops at 275*4=1100ns to avoid after pulse
 			if (s[k]>h) h=s[k];
-			if (k<tt-10+20) ah+=s[k];
+			if (k<tt-5+10) ah+=s[k];
 			a+=s[k];
 		}
-		f=ah/a;
+		f=(a-ah)/a; // PSD parameter: tail/total
 		tt*=4; // convert to ns
-		if (tt<698 || a<5000 || f>0.83) continue;
+		if (tt<698 || f<0.26) continue;
 
-		// save BPM
+		// process BPM waveforms
 		ti[13]->GetEntry(entry);
+		for (int k=tt/4; k<m; k++)
+			if (sb[k]>3000 && sb[k-1]<3000) { dt=k*4-tt; break; }
 		to->Fill();
 	}
 	to->Write("",TObject::kOverwrite);
