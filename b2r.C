@@ -77,7 +77,7 @@ void b2r(const char* index_file = "index.csv")
 	cout<<"\nCreate "<<root_file<<endl;
 	TFile *output = new TFile(root_file, "recreate");
 	int	sum[8]={0}; // accumulator sums
-	int	ih, max, vbt, vat; float es, em, h;
+	bool pu; int	ih, max, vbt, vat; float es, em, h;
 	int n, ns; unsigned long long ts; float s[99999]={0}, t[99999]; 
 	for (int i=0; i<99999; i++) t[i]=i*dt;
 
@@ -92,6 +92,7 @@ void b2r(const char* index_file = "index.csv")
 			tree[m][c]->Branch("s", s, "s[n]/F"); // waveform samples
 			tree[m][c]->Branch("t", t, "t[n]/F"); // time [ns] of waveform samples
 			tree[m][c]->Branch("ts", &ts, "ts/l"); // 48-bit event timestamp
+			tree[m][c]->Branch("pu", &pu, "pu/B"); // pile-up flag
 			if (format[m][c][0]==1) {
 				tree[m][c]->Branch("ns", &ns, "ns/I"); // number of accumulator sums
 				tree[m][c]->Branch("sum", sum, "sum[ns]/I"); // accumulator sums
@@ -151,7 +152,7 @@ void b2r(const char* index_file = "index.csv")
 					}
 
 					input.read(byte,4); nwords-=1; // number of waveform samples
-					n=2*((*word)&0x3ffffff); bitset<4> flag(byte[3]);
+					n=2*((*word)&0x3ffffff); pu=(byte[3]&0x4);
 					for (int i=0; i<n; i+=2) {
 						input.read(byte,4); nwords-=1; // read two samples
 						s[i]=*word&0xffff; s[i+1]=(*word&0xffff0000)>>16;
