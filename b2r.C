@@ -112,7 +112,7 @@ void b2r(const char* index_file = "index.csv")
 	}
 
 	cout<<"Convert binary input to ROOT trees..."<<endl;
-	int word[100]; // read not more than 100 words at a time
+	unsigned int word[100]; // read not more than 100 words at a time
 	char* byte = (char*) word; // index in unit of byte instead of word
 	for (int ispill=0; ispill<nspill; ispill++) { // loop over spills
 		input.seekg(pos[ispill], ios::beg); // jump to the start of a spill
@@ -130,7 +130,8 @@ void b2r(const char* index_file = "index.csv")
 					input.read(byte,8); nwords-=2; // get event header
 					ts = *word&0xffff0000; // upper timestamp (started at 16th bit)
 					ts = ts<<16; // move it up by 16 bit again
-					ts = ts + word[1]; // combine upper (16) and lower (32) bits
+				 	// combine upper (16) and lower (32) bits
+					ts = ts | static_cast<unsigned long long>(word[1]);
 
 					if (format[m][c][0]==1) { // peak + accumulator sums (gate 1~6)
 						input.read(byte,28); nwords-=7;
