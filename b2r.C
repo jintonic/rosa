@@ -153,7 +153,7 @@ void b2r(const char* index_file = "index.csv")
 					}
 
 					input.read(byte,4); nwords-=1; // number of waveform samples
-					n=2*((*word)&0x3ffffff); pu=(byte[3]&0x4);
+					n=2*((*word)&0x3ffffff); pu=static_cast<bool>(byte[3]&0x4);
 					for (int i=0; i<n; i+=2) {
 						input.read(byte,4); nwords-=1; // read two samples
 						s[i]=*word&0xffff; s[i+1]=(*word&0xffff0000)>>16;
