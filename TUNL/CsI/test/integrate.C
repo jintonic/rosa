@@ -28,7 +28,7 @@ void integrate(const char* run="SIS3316Raw_20220616234302_1.root")
 	TString file(run);
 	file.ReplaceAll("SIS3316Raw", "Integrated");
 	TFile *output = new TFile(file.Data(),"recreate");
-	to = new TTree("t","CsI tree"); // output tree
+	TTree *to = new TTree("t","CsI tree"); // output tree
 
 	to->Branch("m",&m,"m/I"); // number of samples in CsI waveform
 	to->Branch("sb",sb,"sb[m]/F"); // BPM sample value in unit of ADC
@@ -139,5 +139,6 @@ void integrate(const char* run="SIS3316Raw_20220616234302_1.root")
 	}
 	to->Write("",TObject::kOverwrite);
 	output->Close();
+	gSystem->Chmod(file.Data(),S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
 	cout<<"File "<<output->GetName()<<" saved"<<endl;
 }
