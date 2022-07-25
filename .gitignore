@@ -7,4 +7,5 @@
 *.txt
 *.log
 *.err
+*.png
 SIS*Raw*_*.sh
