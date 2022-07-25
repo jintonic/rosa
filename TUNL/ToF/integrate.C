@@ -65,7 +65,7 @@ void integrate(const char* run="SIS3316Raw_20220723210340_1.root")
 		if (b<1100 || db>0.53 || is>0 || tt<72) continue;
 
 		if (tt<0) tt=5;
-		for (int k=tt-5; k<tt+175; k++) {
+		for (int k=tt-5; k<(tt+175<n?tt+175:n); k++) {
 			if (s[k]>h) { h=s[k]; th=k*4; }
 			if (k<tt-5+10) ah+=s[k];
 			a+=s[k];
