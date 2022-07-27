@@ -1,5 +1,5 @@
 // match timestamps of CsI with those in BDs and BPM
-void matchTimeStamps(const char* run="SIS3316Raw_20220616234302_1.root")
+void matchTimeStamps(const char* run="SIS3316Raw_20220727222749_1.root")
 {
 	TString file(run);
 	file.ReplaceAll("SIS3316Raw", "BDchannels");
