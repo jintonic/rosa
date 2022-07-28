@@ -1,5 +1,5 @@
 // integrate a waveform after its baseline aligned to zero
-void integrate(const char* run="SIS3316Raw_20220727222749_1.root")
+void integrate(const char* run="SIS3316Raw_20220728020808_1.root")
 {
 	int i, n, m, np, bd, row, entry; bool is;
 	float a, ah, b, db, f, h, tt, p, dp, dt;
@@ -119,17 +119,17 @@ void integrate(const char* run="SIS3316Raw_20220727222749_1.root")
 			if (s[k]>50 && tt<0) tt=k; // software trigger time
 		}
 		db=sqrt(db)/50; // RMS of baseline
-		//if (db>0.32 || is==true) continue;
+		if (db>0.55 || is==true) continue;
 
 		if (tt<0) tt=5;
-		for (int k=tt-5; k<275; k++) { // stops at 275*4=1100ns to avoid after pulse
+		for (int k=tt-5; k<(tt+112<n?tt+112:n); k++) {
 			if (s[k]>h) h=s[k];
 			if (k<tt-5+10) ah+=s[k];
 			a+=s[k];
 		}
 		f=(a-ah)/a; // PSD parameter: tail/total
 		tt*=4; // convert to ns
-		//if (tt<698 || f<0.26) continue;
+		if (tt<290) continue;
 
 		// process BPM waveforms
 		ti[13]->GetEntry(entry);
