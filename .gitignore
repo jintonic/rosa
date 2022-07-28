@@ -1,3 +1,4 @@
+*.swp
 *.bin
 *.root
 *.d
@@ -8,4 +9,7 @@
 *.log
 *.err
 *.png
-SIS*Raw*_*.sh
+*.jpg
+*.jpeg
+*.pdf
+*_*.sh
