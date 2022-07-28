@@ -21,21 +21,24 @@ echo "check binary files in $1..."
 njobs=`ls -1 $1/SIS*Raw_*_*.bin 2>/dev/null | wc -l`
 if [ $njobs -le 0 ]; then echo "no binary file in $1. Quit."; exit; fi
 
-echo "submit $njobs indexing jobs..."
+echo "process $njobs binary files..."
 for file in `ls -1 $1/SIS*Raw_*_*.bin`; do
   name=$(basename -- $file) # remove path from file name
-  number=${name##*_}; number=${number%.bin} # get number from file name
-  log=${name%.bin}.log; err=${name%.bin}.err; script=${name%.bin}.sh
+  # skip processed binary files
+  out=${name%bin}csv; if [ -f $exp/$out ]; then continue; fi
+
+  log=${name%bin}log; err=${name%bin}err; script=${name%bin}sh
   echo "#!/bin/sh" > $script
   echo "root -b -q $PWD/idx.C'(\"$file\",\"$exp\")'" >> $script
+  number=${name##*_}; number=${number%.bin} # get number from file name
   # man qsub. -V: copy ENV to node; err & output must be separated at hcdata
   qsub -V -N idx$number -o $log -e $err $script
 done
 
 echo "check progress..."
 while true; do
-  qstat
   njobs=`qstat | egrep " idx[0-9]+" | wc -l`
   if [ $njobs -eq 0 ]; then break; fi
-  sleep 3
+  qstat | head -n 1; qstat | egrep " idx[0-9]+"; sleep 3
 done
+chmod 664 *.err *.log &>/dev/null; chmod 775 *_*.sh &>/dev/null

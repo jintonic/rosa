@@ -20,21 +20,24 @@ echo "check CSV files in $1..."
 njobs=`ls -1 $1/SIS*Raw_*_*.csv 2>/dev/null | wc -l`
 if [ $njobs -le 0 ]; then echo "no CSV file in $1. Quit."; exit; fi
 
-echo "submit $njobs b2r jobs..."
+echo "process $njobs CSV files..."
 for file in `ls -1 $fullpath/SIS*Raw_*_*.csv`; do
   name=$(basename -- $file) # remove path from file name
-  number=${name##*_}; number=${number%.csv} # get number from file name
-  log=${name%.csv}.log; err=${name%.csv}.err; script=${name%.csv}.sh
+  # skip processed CSV files
+  out=${name%csv}root; if [ -f $fullpath/$out ]; then continue; fi
+
+  log=${name%csv}log; err=${name%csv}err; script=${name%csv}sh
   echo "#!/bin/sh" > $script
   echo "root -b -q $PWD/b2r.C'(\"$file\")'" >> $script
+  number=${name##*_}; number=${number%.csv} # get number from file name
   # man qsub. -V: copy ENV to node; err & output must be separated at hcdata
   qsub -V -N b2r$number -o $log -e $err $script
 done
 
 echo "check progress..."
 while true; do
-  qstat
   njobs=`qstat | egrep " b2r[0-9]+" | wc -l`
   if [ $njobs -eq 0 ]; then break; fi
-  sleep 3
+  qstat | head -n 1; qstat | egrep " b2r[0-9]+"; sleep 3
 done
+chmod 664 *.err *.log &>/dev/null; chmod 775 *_*.sh &>/dev/null
