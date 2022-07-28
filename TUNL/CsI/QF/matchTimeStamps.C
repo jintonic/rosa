@@ -1,5 +1,5 @@
 // match timestamps of CsI with those in BDs and BPM
-void matchTimeStamps(const char* run="SIS3316Raw_20220727222749_1.root")
+void matchTimeStamps(const char* run="SIS3316Raw_20220728020808_1.root")
 {
 	TString file(run);
 	file.ReplaceAll("SIS3316Raw", "BDchannels");
@@ -49,5 +49,6 @@ void matchTimeStamps(const char* run="SIS3316Raw_20220727222749_1.root")
 		}
 	}
 	output.close();
+	gSystem->Chmod(file.Data(),S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
 	input->Close();
 }
