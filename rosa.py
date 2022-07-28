@@ -73,11 +73,14 @@ def list_index_files_in(experiment_folder):
 
 from tkinter import filedialog
 from subprocess import Popen,PIPE
+used_folder="/"
 def run_idx_C(event=None):
-    binfile = filedialog.askopenfilename(initialdir = "/",
+    global used_folder
+    binfile = filedialog.askopenfilename(initialdir = used_folder,
             title = "Select a binary file to index",
             filetypes = (("binary files", "*.bin*"), ("all files", "*.*")))
     if binfile=='': return
+    used_folder=path.dirname(binfile)
     folder=elist.get(elist.curselection()[0]).replace('\\','/')
     text.delete(1.0,'end')
     with Popen(['root', '-l', '-b', '-q', 'idx.C("'+binfile+'","'+folder+'")'],
