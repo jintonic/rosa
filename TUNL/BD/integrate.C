@@ -1,12 +1,12 @@
 // integrate a waveform after its baseline aligned to zero
-void integrate(const char* run="SIS3316Raw_20220720153101_1.root")
+void integrate(const char* run="SIS3316Raw_20220726152752_1.root")
 {
 	int n, bd; bool is, pu;
 	float a, ah, b, db, f, h, tt, th;
 	float s[1024], t[1024];
 
 	TFile *input = new TFile(run);
-	const int nc=13; // number of channels enabled
+	const int nc=1; // number of channels enabled
 	TTree *ti[nc]={0}; // input trees
 	for (int i=0; i<nc; i++) { // BDs
 		ti[i] = (TTree*) input->Get(Form("t%d",i));
