@@ -1,7 +1,7 @@
 void CreateFit1PEdistr(int fixedMin, int fixedMax)
 {
 	TChain *t = new TChain("t");
-	t->Add(Form("./Integrated_20220722161356_1.root"));
+	t->Add("Integrated_20220729144746_1.root");
 	int n;
 	float s[400], h, b, db;
 	t->SetBranchAddress("n",&n);
@@ -10,8 +10,7 @@ void CreateFit1PEdistr(int fixedMin, int fixedMax)
 	t->SetBranchAddress("b",&b);
 	t->SetBranchAddress("h",&h);
 
-	TFile *output = new TFile(Form("SPE.root"),"recreate");
-	TH1D *hpe = new TH1D("hpe","",500,-100,400);
+	TH1D *hpe = new TH1D("hpe","",500,-100,300);
 
 	int min=99999, max=0; // integration range (will be updated automatically)
 	int nevt = t->GetEntries();
@@ -20,8 +19,8 @@ void CreateFit1PEdistr(int fixedMin, int fixedMax)
 		if (i%5000==0) cout<<"now event "<<i<<endl;
 		t->GetEntry(i);
 		min=fixedMin/4; max=fixedMax/4;
-		if (db>1) continue;
-		if (b<1105) continue;
+		if (db>1.2) continue;
+		if (b<1230) continue;
 		if (h>200) continue;
 		double total=0;
 		for (int j=min; j<max; j++) total+=s[j];
@@ -37,13 +36,13 @@ void CreateFit1PEdistr(int fixedMin, int fixedMax)
 
 	TF1 *f = new TF1("f", "gaus + gaus(3)"
 			"+ [6]*exp(-0.5*((x-2*[4])/[5])**2)"
-			" + [7]*exp(-0.5*((x-3*[4])/[5])**2)", -50,200);
+			" + [7]*exp(-0.5*((x-3*[4])/[5])**2)", -100,400);
 	f->SetParNames("n0", "m0", "s0", "norm", "mean", "sigma", "n2", "n3");
 	f->SetParameter(1,3);
 	f->SetParameter(2,15);
-	f->SetParameter(4,72);
+	f->SetParameter(4,45);
 	f->SetParameter(5,25);
-	f->SetParLimits(4, 50, 100);
+	f->SetParLimits(4, 35, 60);
 	f->SetParLimits(5, 15, 40);
 	f->SetParLimits(6, 0, 500);
 	f->SetParLimits(7, 0, 500);
@@ -74,10 +73,6 @@ void CreateFit1PEdistr(int fixedMin, int fixedMax)
 
 	can->Print("SPE.png");
 	gSystem->Chmod("SPE.png",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
-
-	output->Write();
-	output->Close();
-	gSystem->Chmod("SPE.root",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
 }
 
 //overlap many WFs in one plot to check location of 1 PE pulses by eyes
@@ -85,8 +80,8 @@ void CreateFit1PEdistr(int fixedMin, int fixedMax)
 void DrawWFs()
 {
 	TChain *t = new TChain("t");
-	t->Add(Form("./Integrated_20220722161356_1.root"));
-	t->Draw("s:t", "b>1105 && db<1 && h<200","l",200,0);
+	t->Add("Integrated_20220729144746_1.root");
+	t->Draw("s:t", "b>1230 && db<1.2 && h<200","l",100,0);
 	TText *text = new TText(.8,.8,Form("./")); text->SetNDC(); text->Draw();
 	gPad->Print("1pe.png");
 	gSystem->Chmod("1pe.png",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
@@ -95,7 +90,7 @@ void DrawWFs()
 // integration range is not fixed by default
 void fit1pe(int fixedMin=0, int fixedMax=0)
 {
-	if (fixedMin!=0 && fixedMax!=0) DrawWFs();
+	DrawWFs();
 	CreateFit1PEdistr(fixedMin, fixedMax);
 }
 

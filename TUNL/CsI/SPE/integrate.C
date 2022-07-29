@@ -1,10 +1,10 @@
 // integrate a waveform after its baseline aligned to zero
-void integrate(const char* run="SIS3316Raw_20220722161356_1.root")
+void integrate(const char* run="SIS3316Raw_20220729144746_1.root")
 {
 	int n; bool is; float a, b, db, h, tt; float s[1024], t[1024];
 
 	TFile *input = new TFile(run);
-	TTree *ti = (TTree*) input->Get("t14");
+	TTree *ti = (TTree*) input->Get("t12");
 	ti->SetBranchAddress("n",&n); // number of samples
 	ti->SetBranchAddress("s",s); // waveform samples
 	ti->SetBranchAddress("t",t); // waveform sample time
@@ -31,18 +31,18 @@ void integrate(const char* run="SIS3316Raw_20220722161356_1.root")
 		ti->GetEntry(i);
 
 		a=0; b=0; db=0; h=0; tt=-1; is=kFALSE;
-		for (int k=0; k<20; k++) b+=s[k]; b/=20; // calculate baseline
+		for (int k=0; k<17; k++) b+=s[k]; b/=17; // calculate baseline
 		for (int k=0; k<n; k++) {
 			if (s[k]>16382) is=kTRUE; // saturated (reached 2^14-1)
-			if (k<20) db+=(s[k]-b)*(s[k]-b); // calculate baseline RMS
+			if (k<17) db+=(s[k]-b)*(s[k]-b); // calculate baseline RMS
 			s[k]-=b; // remove baseline
 			if (s[k]>15 && tt<0) tt=k; // software trigger time
 			if (s[k]>h) { h=s[k]; }
 		}
-		db=sqrt(db)/20; // RMS of baseline
+		db=sqrt(db)/17; // RMS of baseline
 		tt*=4; // convert to ns
 
-		for (int k=25; k<40; k++) { a+=s[k]; }
+		for (int k=19; k<30; k++) { a+=s[k]; }
 
 		to->Fill();
 	}
