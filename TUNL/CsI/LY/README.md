@@ -1,3 +1,3 @@
 ## Data
-- Cs137 5 min: Integrated_20220722182222_1.root
-- Background >1 hour: Integrated_20220722205019_1.root
+
+- Am241, 5 min: SIS3316Raw_20220727184747_1.root, ch 12

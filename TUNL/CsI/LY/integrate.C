@@ -1,10 +1,10 @@
 // integrate a waveform after its baseline aligned to zero
-void integrate(const char* run="SIS3316Raw_20220722202241_1.root")
+void integrate(const char* run="SIS3316Raw_20220729145135_1.root")
 {
 	int n; bool pu, is; float a, b, db, h, tt; float s[4000], t[4000]={0};
 
 	TFile *input = new TFile(run);
-	TTree *ti = (TTree*) input->Get("t14");
+	TTree *ti = (TTree*) input->Get("t12");
 	ti->SetBranchAddress("n",&n); // number of samples
 	ti->SetBranchAddress("s",s); // waveform samples
 	ti->SetBranchAddress("t",t); // waveform sample time
@@ -51,6 +51,7 @@ void integrate(const char* run="SIS3316Raw_20220722202241_1.root")
 	}
 	to->Write("",TObject::kOverwrite);
 	output->Close();
+	gSystem->Chmod(file.Data(),S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
 	input->Close();
 	cout<<"File "<<output->GetName()<<" saved"<<endl;
 }
