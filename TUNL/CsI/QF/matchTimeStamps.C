@@ -14,7 +14,7 @@ void matchTimeStamps(const char* run="SIS3316Raw_20220728020808_1.root")
 		ti[i] = (TTree*) input->Get(Form("t%d",i));
 		ti[i]->SetBranchAddress("ts",&ts[i]); // time stamp
 		entries[i]=ti[i]->GetEntries();
-		printf("%6d entris in ch %2d\n",entries[i],i);
+		printf("%6d entries in ch %2d\n",entries[i],i);
 	}
 
 	// loop over all CsI events

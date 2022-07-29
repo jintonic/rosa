@@ -1,8 +1,8 @@
 // integrate a waveform after its baseline aligned to zero
-void integrate(const char* run="SIS3316Raw_20220728020808_1.root")
+void integrate(const char* run="SIS3316Raw_20220727233254_1.root")
 {
 	int i, n, m, np, bd, row, entry; bool is;
-	float a, ah, b, db, f, h, tt, p, dp, dt;
+	float a, ah, b, db, f, h, tt, p, dp, dt, en;
 	float s[1024], t[1024], v[4096], ns[4096], sb[4096], tb[4096];
 	float pa[100], pt[100], ph[100], bgn[100], end[100];
 
@@ -50,6 +50,7 @@ void integrate(const char* run="SIS3316Raw_20220728020808_1.root")
 	to->Branch("s",s,"s[n]/F"); // BD sample in unit of ADC
 	to->Branch("t",t,"t[n]/F"); // time of a BD waveform sample
 	to->Branch("b",&b,"b/F"); // baseline of BD averaged over 100 samples
+	to->Branch("en",&en,"en/F"); // integral in [250,1000] in CsI wf
 	to->Branch("f",&f,"f/F"); // (a-ah)/a
 	to->Branch("h",&h,"h/F"); // height of a BD waveform
 	to->Branch("ah",&ah,"ah/F"); // area of head of a BD waveform
@@ -69,12 +70,12 @@ void integrate(const char* run="SIS3316Raw_20220728020808_1.root")
 		// process CsI waveform
 		ti[12]->GetEntry(i);
 		p=0; dp=0;
-		for (int k=0; k<100; k++) p+=v[k]; p/=100; // calculate pedestal
+		for (int k=0; k<250; k++) p+=v[k]; p/=250; // calculate pedestal
 		for (int k=0; k<m; k++) {
-			if (k<100) dp+=(v[k]-p)*(v[k]-p); // calculate pedestal RMS
+			if (k<250) dp+=(v[k]-p)*(v[k]-p); // calculate pedestal RMS
 			v[k]-=p; // remove pedestal
 		}
-		dp=sqrt(dp)/100; // RMS of pedestal
+		dp=sqrt(dp)/250; // RMS of pedestal
 
 		// search for pulses
 		np=0; bool aboveThreshold, outOfPrevPls, prevSmplBelowThr=true;
@@ -129,7 +130,9 @@ void integrate(const char* run="SIS3316Raw_20220728020808_1.root")
 		}
 		f=(a-ah)/a; // PSD parameter: tail/total
 		tt*=4; // convert to ns
-		if (tt<290) continue;
+		if (tt<290 || f>0.6 || h/a>0.4) continue;
+
+		en=0; for (int k=250; k<1000; k++) en+=v[k];
 
 		// process BPM waveforms
 		ti[13]->GetEntry(entry);
