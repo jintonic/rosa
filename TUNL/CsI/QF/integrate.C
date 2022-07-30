@@ -11,18 +11,18 @@ void integrate(const char* run="SIS3316Raw_20220727233254_1.root")
 	TTree *ti[nc]={0}; // input trees
 	for (int i=0; i<12; i++) { // BDs
 		ti[i] = (TTree*) input->Get(Form("t%d",i));
-		ti[i]->SetBranchAddress("s",s); // waveform samples
-		ti[i]->SetBranchAddress("t",t); // waveform sample time
+		ti[i]->SetBranchAddress("s",s); // BD waveform samples
+		ti[i]->SetBranchAddress("t",t); // BD waveform sample time
 		ti[i]->SetBranchAddress("n",&n); // number of samples
 	}
 	ti[12] = (TTree*) input->Get("t12");
-	ti[12]->SetBranchAddress("s",v); // waveform sample values
+	ti[12]->SetBranchAddress("s",v); // CsI waveform sample values
 	ti[12]->SetBranchAddress("t",ns); // sample time in ns
 	ti[12]->SetBranchAddress("n",&m); // number of samples
 
 	ti[13] = (TTree*) input->Get("t13");
-	ti[13]->SetBranchAddress("s",sb); // waveform sample values
-	ti[13]->SetBranchAddress("t",tb); // sample time in ns
+	ti[13]->SetBranchAddress("s",sb); // BPM waveform sample values
+	ti[13]->SetBranchAddress("t",tb); // BPM waveform sample time
 	ti[13]->SetBranchAddress("n",&m); // number of samples
 
 	TString file(run);
@@ -31,51 +31,53 @@ void integrate(const char* run="SIS3316Raw_20220727233254_1.root")
 	TTree *to = new TTree("t","CsI tree"); // output tree
 
 	to->Branch("m",&m,"m/I"); // number of samples in CsI waveform
-	to->Branch("sb",sb,"sb[m]/F"); // BPM sample value in unit of ADC
-	to->Branch("tb",tb,"tb[m]/F"); // BPM waveform sample time
-	to->Branch("dt",&dt,"dt/F"); // time of flight of neutron to a BD
-	to->Branch("v",v,"v[m]/F"); // CsI sample value in unit of ADC
+	to->Branch("v",v,"v[m]/F"); // CsI waveform sample value in unit of ADC
 	to->Branch("ns",ns,"ns[m]/F"); // CsI waveform index in unit of ns
-	to->Branch("p",&p,"p/F"); // pedestal of CsI averaged over 100 samples
+	to->Branch("p",&p,"p/F"); // pedestal of CsI averaged over 200 samples
 	to->Branch("dp",&dp,"dp/F"); // RMS of pedestal of CsI waveform
 	to->Branch("np",&np,"np/I"); // number of pulses in a CsI waveform
+	to->Branch("en",&en,"en/F"); // integral in [250,1000] in CsI waveform
 	to->Branch("pa",pa,"pa[np]/F"); // pulse area
 	to->Branch("ph",ph,"ph[np]/F"); // pulse height
 	to->Branch("pt",pt,"pt[np]/F"); // pulse time (above threshold)
 	to->Branch("bgn",bgn,"bgn[np]/F"); // beginning of a pulse
 	to->Branch("end",end,"end[np]/F"); // end of a pulse
 
-	to->Branch("a",&a,"a/F"); // area of a BD waveform
-	to->Branch("n",&n,"n/I"); // number of samples in CsI waveform
+	to->Branch("n",&n,"n/I"); // number of samples in BD waveform
 	to->Branch("s",s,"s[n]/F"); // BD sample in unit of ADC
 	to->Branch("t",t,"t[n]/F"); // time of a BD waveform sample
-	to->Branch("b",&b,"b/F"); // baseline of BD averaged over 100 samples
-	to->Branch("en",&en,"en/F"); // integral in [250,1000] in CsI wf
-	to->Branch("f",&f,"f/F"); // (a-ah)/a
+	to->Branch("a",&a,"a/F"); // area of a BD waveform
+	to->Branch("b",&b,"b/F"); // baseline of BD averaged over 50 samples
 	to->Branch("h",&h,"h/F"); // height of a BD waveform
+	to->Branch("f",&f,"f/F"); // (a-ah)/a
 	to->Branch("ah",&ah,"ah/F"); // area of head of a BD waveform
 	to->Branch("bd",&bd,"bd/I"); // channel id of a BD
 	to->Branch("db",&db,"db/F"); // RMS of a BD waveform baseline
 	to->Branch("tt",&tt,"tt/F"); // trigger position of a BD waveform
 	to->Branch("is",&is,"is/B"); // whether a BD waveform is saturated
 
+	to->Branch("sb",sb,"sb[n]/F"); // BPM sample value in unit of ADC
+	to->Branch("tb",tb,"tb[n]/F"); // BPM waveform sample time
+	to->Branch("dt",&dt,"dt/F"); // time difference between BD and BPM
+
 	TString BD(run);
 	BD.ReplaceAll("SIS3316Raw", "BDchannels");
 	BD.ReplaceAll("root", "txt");
 	ifstream BDchannels(BD.Data());
 
+	cout<<ti[12]->GetEntries()<<" events to be processed"<<endl;
 	while (BDchannels>>i>>bd>>row>>entry) {
 		if (i%5000==0) cout<<"Processing event "<<i<<endl;
 
 		// process CsI waveform
 		ti[12]->GetEntry(i);
 		p=0; dp=0;
-		for (int k=0; k<250; k++) p+=v[k]; p/=250; // calculate pedestal
+		for (int k=0; k<200; k++) p+=v[k]; p/=200; // calculate pedestal
 		for (int k=0; k<m; k++) {
-			if (k<250) dp+=(v[k]-p)*(v[k]-p); // calculate pedestal RMS
+			if (k<200) dp+=(v[k]-p)*(v[k]-p); // calculate pedestal RMS
 			v[k]-=p; // remove pedestal
 		}
-		dp=sqrt(dp)/250; // RMS of pedestal
+		dp=sqrt(dp)/200; // RMS of pedestal
 
 		// search for pulses
 		np=0; bool aboveThreshold, outOfPrevPls, prevSmplBelowThr=true;
@@ -132,12 +134,12 @@ void integrate(const char* run="SIS3316Raw_20220727233254_1.root")
 		tt*=4; // convert to ns
 		if (tt<290 || f>0.6 || h/a>0.4) continue;
 
-		en=0; for (int k=250; k<1000; k++) en+=v[k];
+		en=0; for (int k=250; k<1000; k++) en+=v[k]; // calculate En in CsI
 
 		// process BPM waveforms
 		ti[13]->GetEntry(entry);
 		for (int k=tt/4; k<m; k++)
-			if (sb[k]>3000 && sb[k-1]<3000) { dt=k*4-tt; break; }
+			if (sb[k]>3000 && sb[k-1]<sb[k]) { dt=k*4-tt; break; }
 		to->Fill();
 	}
 	to->Write("",TObject::kOverwrite);
