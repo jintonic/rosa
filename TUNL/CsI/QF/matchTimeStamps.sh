@@ -14,7 +14,7 @@ for file in `ls -1 $PWD/SIS*Raw_*_*.root`; do
   echo "root -b -q $PWD/matchTimeStamps.C'(\"$file\")'" >> $script
   number=${name##*_}; number=${number%.root} # get number from file name
   # man qsub. -V: copy ENV to node; err & output must be separated at hcdata
-  echo qsub -V -N match$number -o $log -e $err $script
+  qsub -V -N match$number -o $log -e $err $script
 done
 
 echo "check progress..."
