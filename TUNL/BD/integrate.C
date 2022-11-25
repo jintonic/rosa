@@ -19,7 +19,7 @@ void integrate(const char* run="SIS3316Raw_20220726152752_1.root")
 	TString file(run);
 	file.ReplaceAll("SIS3316Raw", "Integrated");
 	TFile *output = new TFile(file.Data(),"recreate");
-	to = new TTree("t","BD tree"); // output tree
+	TTree *to = new TTree("t","BD tree"); // output tree
 
 	to->Branch("a",&a,"a/F"); // area of a BD waveform
 	to->Branch("n",&n,"n/I"); // number of samples in CsI waveform
