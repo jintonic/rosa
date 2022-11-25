@@ -2,7 +2,7 @@
 void integrate(const char* run="SIS3316Raw_20220727233254_1.root")
 {
 	int i, n, m, np, bd, row, entry; bool is;
-	float a, ah, b, db, f, h, tt, p, dp, dt, en;
+	float a, ah, b, db, f, h, tt, p, dp, dt, en, r, hm, lm, ht, lt;
 	float s[1024], t[1024], v[4096], ns[4096], sb[4096], tb[4096];
 	float pa[100], pt[100], ph[100], bgn[100], end[100];
 
@@ -33,10 +33,15 @@ void integrate(const char* run="SIS3316Raw_20220727233254_1.root")
 	to->Branch("m",&m,"m/I"); // number of samples in CsI waveform
 	to->Branch("v",v,"v[m]/F"); // CsI waveform sample value in unit of ADC
 	to->Branch("ns",ns,"ns[m]/F"); // CsI waveform index in unit of ns
-	to->Branch("p",&p,"p/F"); // pedestal of CsI averaged over 200 samples
+	to->Branch("p",&p,"p/F"); // pedestal of CsI averaged over 300 samples
 	to->Branch("dp",&dp,"dp/F"); // RMS of pedestal of CsI waveform
 	to->Branch("np",&np,"np/I"); // number of pulses in a CsI waveform
-	to->Branch("en",&en,"en/F"); // integral in [250,1000] in CsI waveform
+	to->Branch("en",&en,"en/F"); // integral in [300,1000] in CsI waveform
+	to->Branch("hm",&hm,"hm/F"); // max height in [300,1000)
+	to->Branch("lm",&lm,"lm/F"); // lowest point in [300,1000)
+	to->Branch("ht",&ht,"ht/F"); // time of max height in [300,1000)
+	to->Branch("lt",&lt,"lt/F"); // time of lowest point in [300,1000)
+	to->Branch("r",&r,"r/F"); // integral in [300,400] / en
 	to->Branch("pa",pa,"pa[np]/F"); // pulse area
 	to->Branch("ph",ph,"ph[np]/F"); // pulse height
 	to->Branch("pt",pt,"pt[np]/F"); // pulse time (above threshold)
@@ -72,17 +77,17 @@ void integrate(const char* run="SIS3316Raw_20220727233254_1.root")
 		// process CsI waveform
 		ti[12]->GetEntry(i);
 		p=0; dp=0;
-		for (int k=0; k<200; k++) p+=v[k]; p/=200; // calculate pedestal
+		for (int k=0; k<300; k++) p+=v[k]; p/=300; // calculate pedestal
 		for (int k=0; k<m; k++) {
-			if (k<200) dp+=(v[k]-p)*(v[k]-p); // calculate pedestal RMS
+			if (k<300) dp+=(v[k]-p)*(v[k]-p); // calculate pedestal RMS
 			v[k]-=p; // remove pedestal
 		}
-		dp=sqrt(dp)/200; // RMS of pedestal
+		dp=sqrt(dp)/300; // RMS of pedestal
 
-		// search for pulses
+		// search for pulses in [300,1000)
 		np=0; bool aboveThreshold, outOfPrevPls, prevSmplBelowThr=true;
 		for (int j=0; j<100; j++) { pa[j]=0; ph[j]=0; pt[j]=0; bgn[j]=0; end[j]=0; }
-		for (int k=0; k<m; k++) {
+		for (int k=300; k<1000; k++) {
 			if (v[k]>15) aboveThreshold=true; else aboveThreshold=false;
 			if (np>0 && k==end[np-1] && aboveThreshold) end[np-1]=k+20<m?k+20:m-1;
 
@@ -134,7 +139,14 @@ void integrate(const char* run="SIS3316Raw_20220727233254_1.root")
 		tt*=4; // convert to ns
 		if (tt<290 || f>0.6 || h/a>0.4) continue;
 
-		en=0; for (int k=250; k<1000; k++) en+=v[k]; // calculate En in CsI
+		en=0; r=0; hm=0; lm=9999; ht=-10; lt=-10;
+		for (int k=300; k<1000; k++) {
+			en+=v[k]; // calculate En in CsI
+			if (k<400) r+=v[k];
+			if (hm<v[k]) { ht=k; hm=v[k]; }
+			if (lm>v[k]) { lt=k; lm=v[k]; }
+		}
+		r/=en;
 
 		// process BPM waveforms
 		ti[13]->GetEntry(entry);
