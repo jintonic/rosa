@@ -49,22 +49,22 @@ void Background(const char* run="Integrated_20220722205019_1.root")
 	f->SetParameter(2,2000);
 	f->SetParameter(3,110);
 	f->SetParLimits(3,90,200);
+	a1->Fit("f","R");
 
 	//overshoot correction model
 	TF1 *f1 = new TF1("f1","[0]*exp(-(x-[1])/[2])",150,3000);
 	f1->SetParNames("Norm","start", "decay time");
 	f1->SetLineColor(kGreen);
 	//parameters from overshoot model, decay time is tau_i
-	f1->FixParameter(0,1401);
-	f1->FixParameter(1,97);
-	f1->FixParameter(2,182);
+	f1->FixParameter(0,f->GetParameter(0));
+	f1->FixParameter(1,f->GetParameter(3));
+	f1->FixParameter(2,f->GetParameter(1));
 
-	a1->Fit("f","R");
 	a1->Fit("f1","R+");
 	a1->Draw();
 
 	double B=0;//B is the area before correction function starts
-	for (int i=60; i<97; i++) {B+=s[i];} 
+	for (int i=60; i<97; i++) {B+=s1[i];} 
 	double A = f1->Integral(97,1500); A =A+B;
 	//120 is the point where correction function starts, 1500 is the point correction function goes to zero
 
