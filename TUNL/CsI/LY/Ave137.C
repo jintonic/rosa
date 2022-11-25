@@ -49,24 +49,25 @@ void Ave137(const char* run="Integrated_20220722182222_1.root")
 	f->SetParameter(2,2000);
 	f->SetParameter(3,96);
 	f->SetParLimits(3,90,200);
-
+	a1->Fit("f","R");
+	
 	//overshoot correction model
 	TF1 *f1 = new TF1("f1","[0]*exp(-(x-[1])/[2])",200,3000);
 	f1->SetParNames("Norm","start", "decay time");
 	f1->SetLineColor(kGreen);
 	//parameters from overshoot model, decay time is tau_i
-	f1->FixParameter(0,7500);
-	f1->FixParameter(1,119.7);
-	f1->FixParameter(2,208.7);
+	f1->FixParameter(0,f->GetParameter(0));
+	f1->FixParameter(1,f->GetParameter(3));
+	f1->FixParameter(2,f->GetParameter(1));
+	cout<<f1->GetParameter(0)<<endl;
 
-	a1->Fit("f","R");
 	a1->Fit("f1","R+");
 	a1->Draw();
 
 	double B=0;//B is the area before correction function starts
-	for (int i=60; i<120; i++) {B+=s[i];} 
-	double A = f1->Integral(120,1500); A =A+B;
-	//120 is the point where correction function starts, 1500 is the point correction function goes to zero
+	for (int i=60; i<300; i++) {B+=s1[i];} 
+	double A = f1->Integral(300,1500); A =A+B;
+	//300 is the point where correction function cross the waveform, 1500 is the point correction function goes to zero
 
 	TLatex latex;
 	latex.SetTextSize(0.05);
