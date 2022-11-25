@@ -1,7 +1,7 @@
-void correctOvershoot(const char* run="Integrated_20220729145135_1.root")
+void correctOvershoot(const char* run="Integrated_20220729210628_1.root")
 {
 	TChain *t = new TChain("t");
-	t->Add(Form("./Integrated_20220729145135_1.root"));
+	t->Add(Form("./Integrated_20220729210628_1.root"));
 	int n, tt; bool is, pu; float a, db, b, h, s[99999]= {0};
 	t->SetBranchAddress("s",&s); // waveform samples
 	t->SetBranchAddress("n",&n); // number of samples
@@ -17,7 +17,7 @@ void correctOvershoot(const char* run="Integrated_20220729145135_1.root")
 	int nevt=t->GetEntries(), nevt1=0;
 	for (int i=0; i<nevt; i++) { // event loop
 		t->GetEntry(i); // load data from disk to memory
-		if(db<0.55 && b>1220 && is<1 && pu<1 && h/a<0.01 && a>88e3 && a<98e3) { //cuts in the 60 keV region
+		if(db<0.55 && b>1230 && is<1 && pu<1 && h/a<0.01 && a>86e3 && a<96e3) { //cuts in the 60 keV region
 			for (int j=0; j<n; j++) { // loop over waveform index
 				s1[j]+=s[j]; 
 			}nevt1++;
