@@ -18,7 +18,6 @@
 - [view.C](view.C): a [ROOT][] [script][] to run a [ROOT][] [TTreeViewer][] to examine the contents of [ROOT][] trees
 - [rosa.py](rosa.py): a [Python][] [GUI][] to run all the scripts above
 - [idx.sh](idx.sh): a shell script that submit indexing jobs to [OpenPBS][]
-- [idx.sh](idx.sh): a shell script that submit idx jobs to [OpenPBS][]
 - [b2r.sh](b2r.sh): a shell script that submit b2r jobs to [OpenPBS][]
 
 ### Getting started
