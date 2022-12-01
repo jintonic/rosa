@@ -83,6 +83,7 @@ void integrate(const char* run="SIS3316Raw_20220727233254_1.root")
 			v[k]-=p; // remove pedestal
 		}
 		dp=sqrt(dp)/300; // RMS of pedestal
+		if (dp>0.6 || p<1230) continue;
 
 		// search for pulses in [300,1000)
 		np=0; bool aboveThreshold, outOfPrevPls, prevSmplBelowThr=true;
@@ -137,7 +138,7 @@ void integrate(const char* run="SIS3316Raw_20220727233254_1.root")
 		}
 		f=(a-ah)/a; // PSD parameter: tail/total
 		tt*=4; // convert to ns
-		if (tt<290 || f>0.6 || h/a>0.4) continue;
+		if (tt<290 || f>0.6 || f<0.3 || h/a>0.4) continue;
 
 		en=0; r=0; hm=0; lm=9999; ht=-10; lt=-10;
 		for (int k=300; k<1000; k++) {
@@ -152,6 +153,7 @@ void integrate(const char* run="SIS3316Raw_20220727233254_1.root")
 		ti[13]->GetEntry(entry);
 		for (int k=tt/4; k<m; k++)
 			if (sb[k]>3000 && sb[k-1]<sb[k]) { dt=k*4-tt; break; }
+		if (dt<150) continue;
 		to->Fill();
 	}
 	to->Write("",TObject::kOverwrite);
