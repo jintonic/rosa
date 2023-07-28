@@ -1,7 +1,7 @@
 // integrate a waveform after its baseline aligned to zero
-void integrate(const char* run="SIS3316Raw_20220729145135_1.root")
+void integrate(const char* run="SIS3316Raw_20220727184747_1.root", float tau=16296, int min=60, int max=1500)
 {
-	int n; bool pu, is; float a, b, db, h, tt; float s[4000], t[4000]={0};
+	int n; bool pu, is; float a, b, db, h, tt; float s[4000], t[4000]={0}; float v[4000]={0};
 
 	TFile *input = new TFile(run);
 	TTree *ti = (TTree*) input->Get("t12");
@@ -18,6 +18,7 @@ void integrate(const char* run="SIS3316Raw_20220729145135_1.root")
 	to->Branch("a",&a,"a/F"); // area of a waveform
 	to->Branch("n",&n,"n/I"); // number of samples in CsI waveform
 	to->Branch("s",s,"s[n]/F"); // waveform sample in unit of ADC
+	to->Branch("v",v,"v[n]/F"); // waveform sample after correction in unit of ADC
 	to->Branch("t",t,"t[n]/F"); // time of a waveform sample
 	to->Branch("b",&b,"b/F"); // baseline averaged over 20 samples
 	to->Branch("h",&h,"h/F"); // height of a waveform
@@ -43,8 +44,15 @@ void integrate(const char* run="SIS3316Raw_20220729145135_1.root")
 		}
 		db=sqrt(db)/50; // RMS of baseline
 
-		if (tt==-1) tt=5;
-		for (int k=tt-5; k<700; k++) { a+=s[k]; }
+		//if (tt==-1) tt=5;
+		//for (int k=tt-5; k<700; k++) { a+=s[k]; }
+		//correction for every waveform point by point
+		int dt=4;
+		for (int j=1; j<n; j++) {
+			t[j]=j*dt;
+			v[j]=(tau+dt)/tau*s[j]-s[j-1]+v[j-1];
+		} 
+		a=0; for (int j=min; j<max; j++) a+=v[j];
 		tt*=4; // convert to ns
 
 		to->Fill();
