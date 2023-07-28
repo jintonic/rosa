@@ -62,8 +62,8 @@ void b2r(const char* index_file = "index.csv")
 	cout<<"Get spill positions and sizes: ";
 	for (int i=0; i<6; i++) getline(index,line); // skip 6 lines
 	int nspill=0; // total number of spills in file
-	int pos[5000] = {0}; // position of each spill in file (max 5000 spills)
-	int min_size[5000] = {0}; // minimal size of a spill in all channels in a card
+	int pos[20000] = {0}; // position of each spill in file (max 20000 spills)
+	int min_size[20000] = {0}; // minimal size of a spill in all channels in a card
 	while (getline(index, line)) {
 		nspill=stoi(line.substr(0,7));
 		pos[nspill]=stoi(line.substr(9,19));
