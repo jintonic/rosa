@@ -28,14 +28,14 @@ void idx(const char* input_file = "input.bin",
 	float sampling_rate; string unit;
 	cfg>>key>>value>>key>>value>>key>>key>>sampling_rate>>unit;
 	cout<<"- sampling rate: "<<sampling_rate<<" "<<unit<<endl;
-	int nm, nmused=21; // number of modules used
+	int nm, nmused=3; // number of modules used
 	int nc; // number of channels per module
 	cfg>>key>>key>>key>>key>>key>>key>>nc; // get number of channels per module
 	cfg>>key>>key>>key>>key>>nm; // get number of modules used
 	cout<<"- number of channles per module: "<<nc<<endl;
 	cout<<"- number of modules used: "<<nm<<endl<<endl;
 	for (int i=0; i<5+nm*3; i++) getline(cfg, line); // skip ch id & status
-	bool sync[21][16] = {0}; // sync requirement for each channel
+	bool sync[3][16] = {0}; // sync requirement for each channel
 	for (int m=0; m<nm; m++) 
 		for (int c=0; c<nc; c++) cfg>>sync[m][c];
 	cfg.close();
@@ -57,12 +57,12 @@ void idx(const char* input_file = "input.bin",
 
 	cout<<"Index data blocks (spills) "<<endl;
 	int nspill=0; // total number of spills in file
-	int pos[5000] = {0}; // positions of spills in file (max 5000 spills in a file)
-	int size[5000][21][16] = {0}; // size of spill in each channel
-	int min_size[5000][21]; // min size of spill among all channels in a module
-	bitset<4> format[21][16]; // format bits of each channel
-	bool used[21][16] = {0}; // channels are not connected by default
-	short ch_id[21][16] = {0}; // global channel id
+	int pos[20000] = {0}; // positions of spills in file (max 20000 spills in a file)
+	int size[20000][3][16] = {0}; // size of spill in each channel
+	int min_size[20000][3]; // min size of spill among all channels in a module
+	bitset<4> format[3][16]; // format bits of each channel
+	bool used[3][16] = {0}; // channels are not connected by default
+	short ch_id[3][16] = {0}; // global channel id
 
 	while (input.good() && input.tellg()<fsize-40) { // 40: spill header size
 		input.read(byte,4); // get 1st word of spill header
