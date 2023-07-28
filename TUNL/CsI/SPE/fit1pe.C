@@ -1,12 +1,12 @@
 void CreateFit1PEdistr(int fixedMin, int fixedMax)
 {
 	TChain *t = new TChain("t");
-	t->Add("Integrated_20220729144746_1.root");
+	t->Add("Corrected_20220729211216_1.root");
 	int n;
-	float s[400], h, b, db;
+	float v[400], h, b, db;
 	t->SetBranchAddress("n",&n);
 	t->SetBranchAddress("db",&db);
-	t->SetBranchAddress("s",s);
+	t->SetBranchAddress("v",v);
 	t->SetBranchAddress("b",&b);
 	t->SetBranchAddress("h",&h);
 
@@ -23,7 +23,7 @@ void CreateFit1PEdistr(int fixedMin, int fixedMax)
 		if (b<1230) continue;
 		if (h>200) continue;
 		double total=0;
-		for (int j=min; j<max; j++) total+=s[j];
+		for (int j=min; j<max; j++) total+=v[j];
 		hpe->Fill(total);
 	}
 	
@@ -80,8 +80,8 @@ void CreateFit1PEdistr(int fixedMin, int fixedMax)
 void DrawWFs()
 {
 	TChain *t = new TChain("t");
-	t->Add("Integrated_20220729144746_1.root");
-	t->Draw("s:t", "b>1230 && db<1.2 && h<200","l",100,0);
+	t->Add("Corrected_20220729211216_1.root");
+	t->Draw("v:t", "b>1230 && db<1.2 && h<200","l",100,0);
 	TText *text = new TText(.8,.8,Form("./")); text->SetNDC(); text->Draw();
 	gPad->Print("1pe.png");
 	gSystem->Chmod("1pe.png",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
