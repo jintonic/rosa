@@ -27,17 +27,22 @@ for file in `ls -1 $fullpath/SIS*Raw_*_*.csv`; do
   out=${name%csv}root; if [ -f $fullpath/$out ]; then continue; fi
 
   log=${name%csv}log; err=${name%csv}err; script=${name%csv}sh
-  echo "#!/bin/sh" > $script
-  echo "root -b -q $PWD/b2r.C'(\"$file\")'" >> $script
   number=${name##*_}; number=${number%.csv} # get number from file name
-  # man qsub. -V: copy ENV to node; err & output must be separated at hcdata
-  qsub -V -N b2r$number -o $log -e $err $script
+  echo "#!/bin/bash" > $script
+  echo "#SBATCH -J b2r$number" >> $script
+  echo "#SBATCH -o $log" >> $script
+  echo "#SBATCH -e $err" >> $script
+  echo "root -b -q $PWD/b2r.C'(\"$file\")'" >> $script
+  sbatch $script
 done
 
 echo "check progress..."
 while true; do
-  njobs=`qstat | egrep " b2r[0-9]+" | wc -l`
+  njobs=`squeue | egrep " b2r[0-9]+" | wc -l`
   if [ $njobs -eq 0 ]; then break; fi
-  qstat | head -n 1; qstat | egrep " b2r[0-9]+"; sleep 3
+  squeue | head -n 1; squeue | egrep " b2r[0-9]+"; sleep 3
 done
-chmod 664 *.err *.log &>/dev/null; chmod 775 *_*.sh &>/dev/null
+chmod 664 *.err *.log &>/dev/null
+chmod 775 *_*.sh &>/dev/null
+chmod 664 *.root &>/dev/null
+
