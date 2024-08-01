@@ -89,11 +89,11 @@ void integrate(const char* run="SIS3316Raw_20240726175828_1.root")
 		dp=sqrt(dp)/300; // RMS of pedestal
 		//if (dp>0.6 || p<1230) continue;
 
-		// search for pulses in [300,1000)
+		// search for pulses in [200,2000)
 		np=0; bool aboveThreshold, outOfPrevPls, prevSmplBelowThr=true;
 		for (int j=0; j<100; j++) { pa[j]=0; ph[j]=0; pt[j]=0; bgn[j]=0; end[j]=0; }
-		for (int k=300; k<1000; k++) {
-			if (v[k]>15) aboveThreshold=true; else aboveThreshold=false;
+		for (int k=200; k<1000; k++) {
+			if (v[k]>40) aboveThreshold=true; else aboveThreshold=false;
 			if (np>0 && k==end[np-1] && aboveThreshold) end[np-1]=k+20<m?k+20:m-1;
 
 			outOfPrevPls=true;
@@ -124,14 +124,14 @@ void integrate(const char* run="SIS3316Raw_20240726175828_1.root")
 		// process BD waveform
 		ti[bd]->GetEntry(row);
 		a=0; ah=0; b=0; db=0; f=0; h=0; tt=-1; is=kFALSE;
-		for (int k=0; k<50; k++) b+=s[k]; b/=50; // calculate baseline
+		for (int k=0; k<60; k++) b+=s[k]; b/=60; // calculate baseline
 		for (int k=0; k<n; k++) {
 			if (s[k]>16382) is=kTRUE; // saturated (reached 2^14-1)
-			if (k<50) db+=(s[k]-b)*(s[k]-b); // calculate baseline RMS
+			if (k<60) db+=(s[k]-b)*(s[k]-b); // calculate baseline RMS
 			s[k]-=b; // remove baseline
-			if (s[k]>50 && tt<0) tt=k; // software trigger time
+			if (s[k]>60 && tt<0) tt=k; // software trigger time
 		}
-		db=sqrt(db)/50; // RMS of baseline
+		db=sqrt(db)/60; // RMS of baseline
 		//if (db>0.55 || is==true) continue;
 
 		if (tt<0) tt=5;
