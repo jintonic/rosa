@@ -1,3 +1,8 @@
+## Data
+
+- 24/7/26: 40 K, 50 Ohm, ~ 20 PE/keV
+- 24/7/30: 40 K, 1k Ohm, ~ 20 PE/keV
+
 ## rsync data from TUNL
 
 ```sh
