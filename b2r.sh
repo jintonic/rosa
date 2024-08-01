@@ -29,11 +29,8 @@ for file in `ls -1 $fullpath/SIS*Raw_*_*.csv`; do
   log=${name%csv}log; err=${name%csv}err; script=${name%csv}sh
   number=${name##*_}; number=${number%.csv} # get number from file name
   echo "#!/bin/bash" > $script
-  echo "#SBATCH -J b2r$number" >> $script
-  echo "#SBATCH -o $log" >> $script
-  echo "#SBATCH -e $err" >> $script
   echo "root -b -q $PWD/b2r.C'(\"$file\")'" >> $script
-  sbatch $script
+  sbatch -J b2r$number -o $log -e $err $script
 done
 
 echo "check progress..."

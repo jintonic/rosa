@@ -30,11 +30,8 @@ for file in `ls -1 $1/SIS*Raw_*_*.bin`; do
   log=${name%bin}log; err=${name%bin}err; script=${name%bin}sh
   number=${name##*_}; number=${number%.bin} # get number from file name
   echo "#!/bin/bash" > $script
-  echo "#SBATCH -J b2r$number" >> $script
-  echo "#SBATCH -o $log" >> $script
-  echo "#SBATCH -e $err" >> $script
   echo "root -b -q $PWD/idx.C'(\"$file\",\"$exp\")'" >> $script
-  sbatch $script
+  sbatch -J idx$number -o $log -e $err $script
 done
 
 echo "check progress..."
