@@ -1,3 +1,4 @@
+# This file is used to fit waveforms by expo functions
 {
 	TChain *t = new TChain("t");
 	t->Add("shrinked.root");
