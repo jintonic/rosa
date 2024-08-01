@@ -2,6 +2,7 @@
 
 ```sh
 rsync -av bbq:/Volumes/csi_daq/production/SIS3316Raw_2024073018*.bin .
+rsync -av *.bin p:/data7/coherent/rosa/TUNL/CsI24/QF/
 ```
 
 `-a` is used to preserve all meta data of a file. `-v` turns on verbose output. `bbq` is defined in `~/.ssh/config` as
