@@ -1,14 +1,14 @@
 // integrate a waveform after its baseline aligned to zero
-void integrate(const char* run="SIS3316Raw_20220729182748_9.root",
+void integrate(const char* fin="SIS3316Raw_20220729182748_9.root",
 		double tau=18000 /* RC constant for overshooting correction */)
 {
-	int i, n, m, np, bd, row, entry; bool is;
+	int i, n, m, np, bd, row, entry, date, time, run, evnt; bool is;
 	float a, ah, b, db, f, h, tt, p, dp, pb, dt, hm, lm, ht, lt, e2, e3, e4, e5;
 	float s[1024], t[1024], v[4096], ns[4096], sb[4096], tb[4096];
 	float pa[100], pt[100], ph[100], bgn[100], end[100];
 	float vc[4096]={0};
 
-	TFile *input = new TFile(run);
+	TFile *input = new TFile(fin);
 	const int nc=14; // number of channels enabled
 	TTree *ti[nc]={0}; // input trees
 	for (int i=0; i<12; i++) { // BDs
@@ -27,10 +27,15 @@ void integrate(const char* run="SIS3316Raw_20220729182748_9.root",
 	ti[13]->SetBranchAddress("t",tb); // BPM waveform sample time
 	ti[13]->SetBranchAddress("n",&m); // number of samples
 
-	TString file(run);
-	file.ReplaceAll("SIS3316Raw", "Integrated");
+	TString file(fin);
+	file.ReplaceAll("SIS3316Raw", "Integrated18_");
 	TFile *output = new TFile(file.Data(),"recreate");
 	TTree *to = new TTree("t","CsI tree"); // output tree
+
+	to->Branch("date",&date,"date/I"); // The date of the data
+	to->Branch("time",&time,"time/I"); // The time of the data
+	to->Branch("run",&run,"run/I"); // The run number of data
+	to->Branch("evnt",&evnt,"evnt/I"); // The run number of data
 
 	to->Branch("m",&m,"m/I"); // number of samples in CsI waveform
 	to->Branch("v",v,"v[m]/F"); // CsI waveform sample value in unit of ADC
@@ -71,7 +76,7 @@ void integrate(const char* run="SIS3316Raw_20220729182748_9.root",
 	to->Branch("tb",tb,"tb[n]/F"); // BPM waveform sample time
 	to->Branch("dt",&dt,"dt/F"); // time difference between BD and BPM
 
-	TString BD(run);
+	TString BD(fin);
 	BD.ReplaceAll("SIS3316Raw", "BDchannels");
 	BD.ReplaceAll("root", "txt");
 	ifstream BDchannels(BD.Data());
@@ -90,6 +95,18 @@ void integrate(const char* run="SIS3316Raw_20220729182748_9.root",
 		}
 		dp=sqrt(dp)/300; // RMS of pedestal
 		if (dp>0.6 || p<1230) continue;
+
+		//process date time and index
+		//date = 0; time=0; run =0; evnt=0;
+		TString dates(BD(BD.First('_')+3,6));
+		date = dates.Atoi();
+		TString times(BD(BD.First('_')+9,6));
+		time = times.Atoi();
+		TString runs(BD(BD.Last('.')-1,1));
+		run = runs.Atoi();
+		evnt=i;
+
+
 
 		// search for pulses in [300,1000)
 		np=0; bool aboveThreshold, outOfPrevPls, prevSmplBelowThr=true;
