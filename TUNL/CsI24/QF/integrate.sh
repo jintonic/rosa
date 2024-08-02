@@ -28,4 +28,4 @@ while true; do
   if [ $njobs -eq 0 ]; then break; fi
   squeue | head -n 1; squeue | egrep " int[0-9]+"; sleep 3
 done
-chmod 664 *.err *.log &>/dev/null; chmod 775 *_*.sh &>/dev/null
+chmod 664 *.err *.log *.root &>/dev/null; chmod 775 *_*.sh &>/dev/null

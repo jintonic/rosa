@@ -3,6 +3,14 @@
 - 24/7/26: 40 K, 50 Ohm, ~ 20 PE/keV
 - 24/7/30: 40 K, 1k Ohm, ~ 20 PE/keV
 
+## Data processing
+
+idx.C takes about 3 min
+
+1. run [matchTimeStamps.sh](matchTimeStamps.sh)
+2. run [integrate.sh](integrate.sh), which takes about 6:24 min
+3. run `root -b -q combine.C'("Integrate_20240730182220")'`
+
 ## rsync data from TUNL
 
 ```sh
