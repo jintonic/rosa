@@ -9,13 +9,13 @@ for run in `ls -1 Integrated_*_1.root`; do
 
   echo "#!/bin/sh" > $id.sh
   echo "root -b -q $PWD/combine.C'(\"$PWD/$id\",$n)'" >> $id.sh
-  qsub -V -N $id -o $id.log -e $id.err $id.sh
+  sbatch -J $id -o $id.log -e $id.err $id.sh
 done
 
 echo "check progress..."
 while true; do
-  njobs=`qstat | egrep " ...[0-9]+" | wc -l`
+  njobs=`squeue | grep " Integr" | wc -l`
   if [ $njobs -eq 0 ]; then break; fi
-  qstat | head -n 1; qstat | egrep " ...[0-9]+"; sleep 3
+  squeue | head -n 1; squeue | grep " Integr"; sleep 5
 done
 chmod 664 *.err *.log &>/dev/null; chmod 775 *_*.sh &>/dev/null

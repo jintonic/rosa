@@ -75,7 +75,7 @@ void integrate(const char* run="SIS3316Raw_20240726175828_1.root")
 			v[k]-=p; // remove pedestal
 		}
 		dp=sqrt(dp)/300; // RMS of pedestal
-		if (dp>0.6 || p>2000) continue; // remove events with noisy or pile-up CsI WFs
+		if (dp>10 || p>2000) continue; // remove events with noisy or pile-up CsI WFs
 
 		h=0; l=9999; th=-10; tl=-10; e=0;
 		for (k=300; k<1500; k++) {
