@@ -1,7 +1,7 @@
 // integrate a waveform after its baseline aligned to zero
-void integrate(const char* run="SIS3316Raw_20220727184747_1.root")
+void integrate(const char* run="SIS3316Raw_20240726151921_1.root")
 {
-	int n, np; bool pu, is; float a, b, db, h, tt; float s[5000], t[5000]={0};
+	int n, np; bool pu; float a, b, db, h, tt; float s[5000], t[5000]={0};
 	float pa[100], pt[100], ph[100], bgn[100], end[100];
 
 	TFile *input = new TFile(run);
@@ -24,8 +24,6 @@ void integrate(const char* run="SIS3316Raw_20220727184747_1.root")
 	to->Branch("h",&h,"h/F"); // height of a waveform
 	to->Branch("db",&db,"db/F"); // RMS of baseline
 	to->Branch("tt",&tt,"tt/F"); // trigger position of a pulse
-	to->Branch("is",&is,"is/O"); // whether a waveform is saturated
-	to->Branch("pu",&pu,"pu/O"); // pile-up flag
 	to->Branch("np",&np,"np/I"); // number of pulses in a CsI waveform
 	to->Branch("pa",pa,"pa[np]/F"); // pulse area
 	to->Branch("ph",ph,"ph[np]/F"); // pulse height
@@ -38,11 +36,11 @@ void integrate(const char* run="SIS3316Raw_20220727184747_1.root")
 	for (int i=0; i<nevt; i++) {
 		if (i%5000==0) cout<<"Processing event "<<i<<endl;
 		ti->GetEntry(i);
+		if (pu==true) continue; // skip pile-up waveforms
 
-		a=0; b=0; db=0; h=0; tt=-1; is=kFALSE;
+		a=0; b=0; db=0; h=0; tt=-1;
 		for (int k=0; k<400; k++) b+=s[k]; b/=400; // calculate baseline
 		for (int k=0; k<n; k++) {
-			if (s[k]>16382) is=kTRUE; // saturated (reached 2^14-1)
 			if (k<400) db+=(s[k]-b)*(s[k]-b); // calculate baseline RMS
 			s[k]-=b; // remove baseline
 			if (s[k]>100 && tt<0) tt=k; // software trigger time
@@ -51,12 +49,12 @@ void integrate(const char* run="SIS3316Raw_20220727184747_1.root")
 		db=sqrt(db)/400; // RMS of baseline
 
 		if (tt==-1) tt=30;
-		for (int k=tt-30; k<3000; k++) { a+=s[k]; }
+		for (int k=tt-30; k<4000; k++) { a+=s[k]; }
 
-		// search for pulses in [3000,5000)
+		// search for pulses in [4000,5000)
 		np=0; bool aboveThreshold, outOfPrevPls, prevSmplBelowThr=true;
 		for (int j=0; j<100; j++) { pa[j]=0; ph[j]=0; pt[j]=0; bgn[j]=0; end[j]=0; }
-		for (int k=3000; k<5000; k++) {
+		for (int k=4000; k<5000; k++) {
 			if (s[k]>20) aboveThreshold=true; else aboveThreshold=false;
 			if (np>0 && k==end[np-1] && aboveThreshold) end[np-1]=k+40<n?k+40:n-1;
 
@@ -89,5 +87,6 @@ void integrate(const char* run="SIS3316Raw_20220727184747_1.root")
 	to->Write("",TObject::kOverwrite);
 	output->Close();
 	input->Close();
+	gSystem->Chmod(file.Data(),S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
 	cout<<"File "<<output->GetName()<<" saved"<<endl;
 }
