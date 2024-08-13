@@ -4,6 +4,7 @@ void integrate(const char* run="SIS3316Raw_20220726152752_1.root")
 	int n, bd; bool is, pu;
 	float a, ah, b, db, f, h, tt, th;
 	float s[1024], t[1024];
+	unsigned long long ts;
 
 	TFile *input = new TFile(run);
 	const int nc=1; // number of channels enabled
@@ -14,6 +15,7 @@ void integrate(const char* run="SIS3316Raw_20220726152752_1.root")
 		ti[i]->SetBranchAddress("t",t); // waveform sample time
 		ti[i]->SetBranchAddress("n",&n); // number of samples
 		ti[i]->SetBranchAddress("pu",&pu); // pile-up flag
+		ti[i]->SetBranchAddress("ts",&ts); // 48-bit event timestamp
 	}
 
 	TString file(run);
@@ -35,6 +37,7 @@ void integrate(const char* run="SIS3316Raw_20220726152752_1.root")
 	to->Branch("th",&th,"th/F"); // position of highest point
 	to->Branch("is",&is,"is/B"); // whether a waveform is saturated
 	to->Branch("pu",&pu,"pu/O"); // pile-up flag
+	to->Branch("ts",&ts,"ts/l"); // 48-bit event timestamp
 
 	int nevt = ti[0]->GetEntries();// nevt=186032;
 	cout<<nevt<<" events to be processed"<<endl;
