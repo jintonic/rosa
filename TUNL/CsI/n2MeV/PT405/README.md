@@ -2,6 +2,7 @@
 
 - 24/7/26: 40 K, 50 Ohm, ~ 20 PE/keV
 - 24/7/30: 40 K, 1k Ohm, ~ 20 PE/keV
+- 24/8/02: 60 K, 1k Ohm, ~ 10 PE/keV
 
 ## Data processing
 
