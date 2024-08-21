@@ -10,9 +10,9 @@ Detailed log: <https://docs.google.com/spreadsheets/d/11mwPQ_ER7XrjiXmSumxyJo9ou
 
 idx.C takes about 3 min
 
-1. run [matchTimeStamps.sh](matchTimeStamps.sh)
-2. run [integrate.sh](integrate.sh), which takes about 6:24 min
-3. run `root -b -q combine.C'("Integrate_20240730182220")'`
+1. run [matchTimeStamps.sh](matchTimeStamps.sh). It takes about 20 min.
+2. run [integrate.sh](integrate.sh), which takes about 31 min
+3. run `root -b -q combine.C'("Integrate_20240730182220")'`, which takes about 3:15 min.
 
 ## rsync data from TUNL
 
