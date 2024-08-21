@@ -1,14 +1,31 @@
 #!/bin/bash
-echo "check ROOT files in current folder..."
-njobs=`ls -1 Integrated_*_1.root 2>/dev/null | wc -l`
-if [ $njobs -le 0 ]; then echo "no ROOT file found. Quit."; exit; fi
+# https://stackoverflow.com/a/23930212/1801749
+read -r -d '' HELP << END
+Submit combine.C jobs to SLURM
+ 
+Usage:
+./combine.sh /path/to/input/files/folder
+END
+
+echo "parse arguments..."
+if [ $# -lt 1 ]; then echo "$HELP"; exit; fi # missing arguments
+test -d "$1" || { echo "$1 doesn't exist. Quit."; exit; }
+if [ ${1:0:1} != '/' ]; then # relative path
+  dir=$PWD/$1
+else # absolute path
+  dir=$1
+fi
+echo "check Integrated*.root in $dir..."
+njobs=`ls -1 $dir/Integrated_*_1.root 2>/dev/null | wc -l`
+if [ $njobs -le 0 ]; then echo "no Integrated*.root found. Quit."; exit; fi
 
 echo "process ROOT files..."
-for run in `ls -1 Integrated_*_1.root`; do
-  id=${run%_*.root}; n=`ls -1 ${id}_*.root | wc -l`
+for run in `ls -1 $dir/Integrated_*_1.root`; do
+  name=$(basename -- $run) # remove path from file name
+  id=${name%_*.root}; n=`ls -1 $dir/${id}_*.root | wc -l`
 
   echo "#!/bin/sh" > $id.sh
-  echo "root -b -q $PWD/combine.C'(\"$PWD/$id\",$n)'" >> $id.sh
+  echo "root -b -q $PWD/combine.C'(\"$dir/$id\",$n)'" >> $id.sh
   sbatch -J $id -o $id.log -e $id.err $id.sh
 done
 
