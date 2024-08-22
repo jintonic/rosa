@@ -17,7 +17,7 @@ else # absolute path
 fi
 
 echo "check BDchannels*.txt in $dir..."
-njobs=`ls -1 BDchannels*.txt 2>/dev/null | wc -l`
+njobs=`ls -1 $dir/BDchannels*.txt 2>/dev/null | wc -l`
 if [ $njobs -le 0 ]; then echo "no BDchannels*.txt found. Quit."; exit; fi
 
 echo "submitting $njobs jobs..."

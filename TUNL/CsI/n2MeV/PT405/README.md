@@ -9,12 +9,16 @@ Detailed log: <https://docs.google.com/spreadsheets/d/11mwPQ_ER7XrjiXmSumxyJo9ou
 ## Data processing
 
 idx.C takes about 3 min
-b2r.sh takes about 15 min.
+b2r.sh takes about 37 min.
 
 1. run [matchTimeStamps.sh](matchTimeStamps.sh). It takes about 20 min.
 2. run [integrate.sh](integrate.sh), which takes about 31 min
 3. run `root -b -q combine.sh 60K/`, which takes about 3:15 min.
 4. run `cd 60K; root -b -q shrink.C`, which takes about 1:15 min.
+
+- SIS3316Raw_20240726185848_14 failed in b2r
+- SIS3316Raw_20240726205239_24 failed in b2r
+- SIS3316Raw_20240726175828_1 failed in matchTimeStamp
 
 ## rsync data from TUNL
 

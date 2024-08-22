@@ -1,9 +1,11 @@
 { // shrink file size with stronger cuts
 	TChain c("t");
-	c.Add("Integrated_20240802154030.root");
-	c.Add("Integrated_20240802164141.root");
-	c.Add("Integrated_20240802184149.root");
-	c.Add("Integrated_20240802205121.root");
+	c.Add("Integrated_20240730172055.root");
+	c.Add("Integrated_20240730182220.root");
+	c.Add("Integrated_20240730192312.root");
+	c.Add("Integrated_20240730193240.root");
+	c.Add("Integrated_20240730210647.root");
+	c.Add("Integrated_20240730220702.root");
 
 	int m, bd; float f, dp, dt, e, e3, e4, e5, rms; float v[5000], ns[5000];
 
@@ -30,7 +32,7 @@
 		if (i%10000==0) cout<<"Processing event "<<i<<endl;
 
 		c.GetEntry(i);
-		if (dp>0.9||f<0.35||f>0.5||dt<80||dt>100||e>1e5) continue;
+		if (dp>1.2||f<0.35||f>0.5||dt<80||dt>100||e>1e5) continue;
 
 		e3=e4=e5=rms=0; // calculate new parameters
 		for (int k=1600/4; k<5000/4; k++) {
