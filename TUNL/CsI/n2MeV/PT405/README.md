@@ -9,10 +9,12 @@ Detailed log: <https://docs.google.com/spreadsheets/d/11mwPQ_ER7XrjiXmSumxyJo9ou
 ## Data processing
 
 idx.C takes about 3 min
+b2r.sh takes about 15 min.
 
 1. run [matchTimeStamps.sh](matchTimeStamps.sh). It takes about 20 min.
 2. run [integrate.sh](integrate.sh), which takes about 31 min
-3. run `root -b -q combine.C'("Integrate_20240730182220")'`, which takes about 3:15 min.
+3. run `root -b -q combine.sh 60K/`, which takes about 3:15 min.
+4. run `cd 60K; root -b -q shrink.C`, which takes about 1:15 min.
 
 ## rsync data from TUNL
 
