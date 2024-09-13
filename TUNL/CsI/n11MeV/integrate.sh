@@ -1,32 +1,43 @@
 #!/bin/bash
-echo "check ROOT files in current folder..."
-njobs=`ls -1 SIS*Raw_*_*.root 2>/dev/null | wc -l`
-if [ $njobs -le 0 ]; then echo "no ROOT file found. Quit."; exit; fi
+# https://stackoverflow.com/a/23930212/1801749
+read -r -d '' HELP << END
+Submit integrate.C jobs to SLURM
 
-echo "process $njobs ROOT files on July 29, 2022 ..."
-for file in `ls -1 $PWD/SIS*Raw_20220729*_*.root`; do
+Usage:
+./integrate.sh /path/to/input/files/folder
+END
+
+echo "parse arguments..."
+if [ $# -lt 1 ]; then echo "$HELP"; exit; fi # missing arguments
+test -d "$1" || { echo "$1 doesn't exist. Quit."; exit; }
+if [ ${1:0:1} != '/' ]; then # relative path
+  dir=$PWD/$1
+else # absolute path
+  dir=$1
+fi
+
+echo "check BDchannels*.txt in $dir..."
+njobs=`ls -1 $dir/BDchannels*.txt 2>/dev/null | wc -l`
+if [ $njobs -le 0 ]; then echo "no BDchannels*.txt found. Quit."; exit; fi
+
+echo "submitting $njobs jobs..."
+for file in `ls -1 $dir/BDchannels_*_*.txt`; do
   name=$(basename -- $file) # remove path from file name
-  out=Integrated${name#SIS3316Raw};
+  in=SIS3316Raw${name#BDchannels}; in=${in%txt}root;
+  out=Integrated${name#BDchannels}; out=${out%txt}root;
   if [ -f $out ]; then continue; fi # skip processed files
   
-  log=${name%root}log; err=${name%root}err; script=${name%root}sh
+  log=${out%root}log; err=${out%root}err; script=${out%root}sh
   echo "#!/bin/sh" > $script
-  if [[ $name == *130801* ]]; then
-    echo "root -b -q $PWD/integrate.C'(\"$file\", 17935)'" >> $script
-  elif [[ $name == *182748* ]]; then
-    echo "root -b -q $PWD/integrate.C'(\"$file\", 17748)'" >> $script
-  else
-    echo "root -b -q $PWD/integrate.C'(\"$file\")'" >> $script
-  fi
+  echo "root -b -q $PWD/integrate.C'(\"$dir/$in\")'" >> $script
   number=${name##*_}; number=${number%.root} # get number from file name
-  # man qsub. -V: copy ENV to node; err & output must be separated at hcdata
-  qsub -V -N int$number -o $log -e $err $script
+  sbatch -J int$number -o $log -e $err $script
 done
 
 echo "check progress..."
 while true; do
-  njobs=`qstat | egrep " int[0-9]+" | wc -l`
+  njobs=`squeue | egrep " int[0-9]+" | wc -l`
   if [ $njobs -eq 0 ]; then break; fi
-  qstat | head -n 1; qstat | egrep " int[0-9]+"; sleep 3
+  squeue | head -n 1; squeue | egrep " int[0-9]+"; sleep 3
 done
-chmod 664 *.err *.log &>/dev/null; chmod 775 *_*.sh &>/dev/null
+chmod 664 *.err *.log *.root &>/dev/null; chmod 775 *_*.sh &>/dev/null
