@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://stackoverflow.com/a/23930212/1801749
 read -r -d '' HELP << END
-Submit indexing jobs to a Portable Batch System (PBS)
+Submit indexing jobs to Slurm
  
 Usage:
 /path/to/idx.sh /path/to/input/files/folder /path/to/output/files/folder
