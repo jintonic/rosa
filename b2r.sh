@@ -1,7 +1,7 @@
 #!/bin/bash
 # https://stackoverflow.com/a/23930212/1801749
 read -r -d '' HELP << END
-Submit b2r jobs to a Portable Batch System (PBS)
+Submit b2r jobs to Slurm
  
 Usage:
 /path/to/b2r.sh /path/to/input/files/folder
